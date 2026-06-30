@@ -2,6 +2,8 @@ import os
 from typing import Optional
 
 from flask import Flask, jsonify
+from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import HTTPException
 
 from config import config_by_name
 from extensions import cors, db, jwt, migrate
@@ -19,11 +21,14 @@ def create_app(config_name: Optional[str] = None) -> Flask:
 
     _init_extensions(app)
     import models  # noqa: F401
-    with app.app_context():
-        db.create_all()
+    if app.config.get("TESTING") or app.config.get("DEBUG") or os.getenv("AUTO_CREATE_TABLES", "0") == "1":
+        with app.app_context():
+            db.create_all()
     _register_routes(app)
     _register_home_route(app)
     _register_healthcheck(app)
+    _register_error_handlers(app)
+    _register_jwt_error_handlers()
 
     return app
 
@@ -66,6 +71,44 @@ def _register_healthcheck(app: Flask) -> None:
     @app.get("/health")
     def healthcheck():
         return jsonify({"status": "ok", "service": "ProjectMatch API"}), 200
+
+
+def _register_error_handlers(app: Flask) -> None:
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(error):
+        return jsonify({"message": error.description}), error.code
+
+    @app.errorhandler(IntegrityError)
+    def handle_integrity_error(_error):
+        db.session.rollback()
+        return jsonify({"message": "Database integrity error"}), 400
+
+    @app.errorhandler(Exception)
+    def internal_error(_error):
+        db.session.rollback()
+        return jsonify({"message": "Internal server error"}), 500
+
+
+def _register_jwt_error_handlers() -> None:
+    @jwt.unauthorized_loader
+    def unauthorized_loader(error_message):
+        return jsonify({"message": error_message}), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_loader(error_message):
+        return jsonify({"message": error_message}), 422
+
+    @jwt.expired_token_loader
+    def expired_token_loader(_jwt_header, _jwt_payload):
+        return jsonify({"message": "Token has expired"}), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_loader(_jwt_header, _jwt_payload):
+        return jsonify({"message": "Token has been revoked"}), 401
+
+    @jwt.needs_fresh_token_loader
+    def needs_fresh_token_loader(_jwt_header, _jwt_payload):
+        return jsonify({"message": "Fresh token required"}), 401
 
 
 app = create_app()

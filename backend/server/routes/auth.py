@@ -4,6 +4,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
 from models.user import User
+from utils.validators import (
+	normalize_email,
+	parse_json_payload,
+	validate_email,
+	validate_password,
+	validate_required_text,
+)
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -25,13 +32,17 @@ def auth_index():
 
 @auth_bp.post("/register")
 def register():
-	payload = request.get_json(silent=True) or {}
-	full_name = payload.get("full_name", "").strip()
-	email = payload.get("email", "").strip().lower()
-	password = payload.get("password", "")
-
-	if not full_name or not email or not password:
-		return jsonify({"message": "full_name, email, and password are required"}), 400
+	try:
+		payload = parse_json_payload(request)
+		full_name = validate_required_text(
+			payload.get("full_name"), "full_name", min_length=2, max_length=120
+		)
+		email = normalize_email(payload.get("email"))
+		validate_email(email)
+		password = payload.get("password", "")
+		validate_password(password)
+	except ValueError as exc:
+		return jsonify({"message": str(exc)}), 400
 
 	if User.query.filter_by(email=email).first() is not None:
 		return jsonify({"message": "Email already exists"}), 409
@@ -60,12 +71,14 @@ def register():
 
 @auth_bp.post("/login")
 def login():
-	payload = request.get_json(silent=True) or {}
-	email = payload.get("email", "").strip().lower()
-	password = payload.get("password", "")
-
-	if not email or not password:
-		return jsonify({"message": "email and password are required"}), 400
+	try:
+		payload = parse_json_payload(request)
+		email = normalize_email(payload.get("email"))
+		validate_email(email)
+		password = payload.get("password", "")
+		validate_password(password)
+	except ValueError as exc:
+		return jsonify({"message": str(exc)}), 400
 
 	user = User.query.filter_by(email=email).first()
 	if user is None or not check_password_hash(user.password_hash, password):
@@ -86,7 +99,7 @@ def login():
 @jwt_required()
 def me():
 	user_id = get_jwt_identity()
-	user = User.query.get(user_id)
+	user = db.session.get(User, int(user_id))
 
 	if user is None:
 		return jsonify({"message": "User not found"}), 404
