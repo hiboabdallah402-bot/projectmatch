@@ -53,7 +53,7 @@ function Navbar() {
           className="inline-flex rounded-lg border border-slate-300 p-2 text-slate-700 sm:hidden"
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav"
-          aria-label="Toggle navigation"
+          aria-label="Toggle main navigation"
           onClick={() => setIsMenuOpen((open) => !open)}
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -71,6 +71,9 @@ function Navbar() {
             <>
               <NavLink to="/app" className={navLinkClassName}>
                 Workspace
+              </NavLink>
+              <NavLink to="/app/profile" className={navLinkClassName}>
+                Profile
               </NavLink>
               <button
                 type="button"
@@ -114,6 +117,9 @@ function Navbar() {
               <>
                 <NavLink to="/app" className={navLinkClassName} onClick={closeMenu}>
                   Workspace
+                </NavLink>
+                <NavLink to="/app/profile" className={navLinkClassName} onClick={closeMenu}>
+                  Profile
                 </NavLink>
                 <button
                   type="button"

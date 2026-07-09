@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import axiosClient from '../api/axiosClient'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const healthEndpoint = import.meta.env.VITE_API_HEALTH_ENDPOINT || '/health'
 
@@ -58,7 +59,7 @@ function SetupStatusPage() {
           API base URL: <span className="font-medium">{axiosClient.defaults.baseURL}</span>
         </p>
         <div className={`mt-4 rounded-lg border px-4 py-3 text-sm ${statusClassName}`}>
-          {message}
+          {status === 'checking' ? <LoadingSpinner label="Connecting to backend..." size="sm" className="text-inherit" /> : message}
         </div>
       </article>
     </section>

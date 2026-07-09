@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import AuthField from '../components/auth/AuthField'
 import AuthNotice from '../components/auth/AuthNotice'
 import axiosClient from '../api/axiosClient'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 
 const initialFormState = {
 	full_name: '',
@@ -156,7 +157,7 @@ function RegisterPage() {
 							disabled={!isFormValid || isSubmitting}
 							className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
 						>
-							{isSubmitting ? 'Creating account...' : 'Create account'}
+							{isSubmitting ? <LoadingSpinner label="Creating account..." size="sm" className="text-white" /> : 'Create account'}
 						</button>
 					</form>
 				</div>

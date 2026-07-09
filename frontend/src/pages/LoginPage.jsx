@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthField from '../components/auth/AuthField'
 import AuthNotice from '../components/auth/AuthNotice'
 import axiosClient from '../api/axiosClient'
+import LoadingSpinner from '../components/common/LoadingSpinner'
 import { setAccessToken } from '../utils/auth'
 
 const initialFormState = {
@@ -149,7 +150,7 @@ function LoginPage() {
               disabled={!isFormValid || isSubmitting}
               className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
+              {isSubmitting ? <LoadingSpinner label="Signing in..." size="sm" className="text-white" /> : 'Sign in'}
             </button>
           </form>
 

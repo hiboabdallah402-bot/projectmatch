@@ -14,3 +14,22 @@ body {
 #root {
   min-height: 100vh;
 }
+
+a,
+button,
+input,
+select,
+textarea,
+[role='button'] {
+  transition: box-shadow 150ms ease, transform 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid #0891b2;
+  outline-offset: 2px;
+}
