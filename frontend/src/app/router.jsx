@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import ProtectedLayout from '../layouts/ProtectedLayout'
 import PublicLayout from '../layouts/PublicLayout'
 import HomePage from '../pages/HomePage'
+import RegisterPage from '../pages/RegisterPage'
 import ProtectedPlaceholderPage from '../pages/placeholders/ProtectedPlaceholderPage'
 import PublicPlaceholderPage from '../pages/placeholders/PublicPlaceholderPage'
 import SetupStatusPage from '../pages/SetupStatusPage'
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: 'setup-status',
         element: <SetupStatusPage />,
+      },
+      {
+        path: 'register',
+        element: <RegisterPage />,
       },
     ],
   },
