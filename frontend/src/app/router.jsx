@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import ProtectedLayout from '../layouts/ProtectedLayout'
 import PublicLayout from '../layouts/PublicLayout'
 import HomePage from '../pages/HomePage'
+import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import ProtectedPlaceholderPage from '../pages/placeholders/ProtectedPlaceholderPage'
 import PublicPlaceholderPage from '../pages/placeholders/PublicPlaceholderPage'
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <RegisterPage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
       },
     ],
   },

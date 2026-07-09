@@ -1,13 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import { getAccessToken } from '../utils/auth'
 
 function ProtectedLayout() {
   const location = useLocation()
-  const token = localStorage.getItem('projectmatch_token')
+  const token = getAccessToken()
 
   if (!token) {
-    return <Navigate to="/" replace state={{ from: location }} />
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return (

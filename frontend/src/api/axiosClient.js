@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getAccessToken } from '../utils/auth'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000'
 
@@ -12,7 +13,7 @@ const axiosClient = axios.create({
 })
 
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('projectmatch_token')
+  const token = getAccessToken()
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

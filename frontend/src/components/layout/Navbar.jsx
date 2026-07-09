@@ -1,5 +1,6 @@
-import { Link, NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { clearAccessToken, getAccessToken, getAuthChangeEventName } from '../../utils/auth'
 
 const publicNavItems = [
   { label: 'Explore', to: '/' },
@@ -7,9 +8,29 @@ const publicNavItems = [
 ]
 
 function Navbar() {
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(getAccessToken()))
 
   const closeMenu = () => setIsMenuOpen(false)
+
+  useEffect(() => {
+    const syncAuthState = () => setIsAuthenticated(Boolean(getAccessToken()))
+
+    window.addEventListener('storage', syncAuthState)
+    window.addEventListener(getAuthChangeEventName(), syncAuthState)
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState)
+      window.removeEventListener(getAuthChangeEventName(), syncAuthState)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    clearAccessToken()
+    closeMenu()
+    navigate('/login')
+  }
 
   const navLinkClassName = ({ isActive }) =>
     [
@@ -46,6 +67,32 @@ function Navbar() {
               {item.label}
             </NavLink>
           ))}
+          {isAuthenticated ? (
+            <>
+              <NavLink to="/app" className={navLinkClassName}>
+                Workspace
+              </NavLink>
+              <button
+                type="button"
+                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className={navLinkClassName}>
+                Login
+              </NavLink>
+              <Link
+                to="/register"
+                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </nav>
       </div>
 
@@ -63,6 +110,33 @@ function Navbar() {
                 {item.label}
               </NavLink>
             ))}
+            {isAuthenticated ? (
+              <>
+                <NavLink to="/app" className={navLinkClassName} onClick={closeMenu}>
+                  Workspace
+                </NavLink>
+                <button
+                  type="button"
+                  className="rounded-full border border-slate-300 px-4 py-2 text-left text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={navLinkClassName} onClick={closeMenu}>
+                  Login
+                </NavLink>
+                <Link
+                  to="/register"
+                  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                  onClick={closeMenu}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       )}
