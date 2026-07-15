@@ -11,14 +11,10 @@ function SetupStatusPage() {
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await axiosClient.get(healthEndpoint)
-        const summary =
-          typeof response.data === 'object'
-            ? JSON.stringify(response.data)
-            : String(response.data)
+        await axiosClient.get(healthEndpoint)
 
         setStatus('connected')
-        setMessage(`Backend reachable at ${healthEndpoint}. Response: ${summary}`)
+        setMessage(`Backend is reachable. Health endpoint ${healthEndpoint} responded successfully.`)
       } catch (error) {
         const fallback =
           'Unable to connect to backend with current API settings. Verify VITE_API_BASE_URL and VITE_API_HEALTH_ENDPOINT.'
@@ -43,18 +39,18 @@ function SetupStatusPage() {
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       <header className="space-y-3">
         <p className="inline-flex rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-          Phase 1 Complete
+          Setup Status
         </p>
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          ProjectMatch frontend foundation is ready
+          ProjectMatch system status
         </h1>
         <p className="text-base leading-7 text-slate-600">
-          React Router, Axios, Tailwind CSS, and the reusable base layout are configured and ready for feature development.
+          Review the current API configuration and live backend connectivity for this environment.
         </p>
       </header>
 
       <article className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-        <h2 className="text-lg font-medium text-slate-900">Backend connection test</h2>
+        <h2 className="text-lg font-medium text-slate-900">Backend connectivity</h2>
         <p className="mt-2 text-sm text-slate-600">
           API base URL: <span className="font-medium">{axiosClient.defaults.baseURL}</span>
         </p>

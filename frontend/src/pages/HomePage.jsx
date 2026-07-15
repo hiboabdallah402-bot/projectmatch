@@ -54,12 +54,6 @@ function HomePage() {
               >
                 Explore features
               </a>
-              <Link
-                to="/setup-status"
-                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                View setup status
-              </Link>
             </div>
           </div>
 
@@ -143,12 +137,6 @@ function HomePage() {
               className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition-transform hover:-translate-y-0.5"
             >
               Review features
-            </Link>
-            <Link
-              to="/setup-status"
-              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              Check setup status
             </Link>
           </div>
         </div>
