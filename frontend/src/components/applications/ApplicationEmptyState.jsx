@@ -1,4 +1,8 @@
-function ApplicationEmptyState() {
+function ApplicationEmptyState({ title = 'No applications yet', description }) {
+  const bodyText =
+    description ||
+    'Your projects have not received applications yet. Share your project links with collaborators to start receiving applicants.'
+
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
@@ -9,9 +13,9 @@ function ApplicationEmptyState() {
           />
         </svg>
       </div>
-      <h2 className="mt-4 text-xl font-semibold tracking-tight text-slate-900">No applications yet</h2>
+      <h2 className="mt-4 text-xl font-semibold tracking-tight text-slate-900">{title}</h2>
       <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-        Your projects have not received applications yet. Share your project links with collaborators to start receiving applicants.
+        {bodyText}
       </p>
     </div>
   )

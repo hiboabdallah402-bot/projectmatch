@@ -10,7 +10,7 @@ function UserProfileSummaryCard({ user, isLoading, errorMessage }) {
     : 'Unavailable'
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300">
+    <article className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 sm:p-7">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Profile summary</p>
 
       {isLoading ? (
@@ -21,14 +21,14 @@ function UserProfileSummaryCard({ user, isLoading, errorMessage }) {
         </div>
       ) : (
         <div className="mt-4 space-y-4">
-          <div>
+          <div className="space-y-1.5">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
               {fullName || 'Name unavailable'}
             </h2>
             <p className="mt-1 text-sm text-slate-600">{email || 'Email unavailable'}</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Joined</p>
             <p className="mt-1 text-sm font-medium text-slate-800">{joinedDate}</p>
           </div>

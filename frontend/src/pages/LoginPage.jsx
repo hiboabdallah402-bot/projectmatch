@@ -84,25 +84,24 @@ function LoginPage() {
 
   return (
     <section className="mx-auto w-full max-w-5xl">
-      <div className="grid gap-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-10">
-        <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-7 text-white sm:p-9">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.3),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.3),_transparent_40%)]" />
+      <div className="grid gap-8 rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
+        <div className="min-w-0 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-7 sm:p-9">
           <div className="relative space-y-5">
-            <p className="inline-flex rounded-full border border-cyan-400/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
+            <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
               Welcome back
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
               Sign in and continue to your protected workspace.
             </h1>
-            <p className="text-sm leading-7 text-slate-300 sm:text-base">
+            <p className="text-sm leading-7 text-slate-600 sm:text-base">
               Access your account to continue exploring projects, tracking applications, and preparing for the next
               collaboration steps.
             </p>
 
-            <div className="space-y-3 text-sm text-slate-200">
+            <div className="space-y-3 text-sm text-slate-700">
               {['Resume your project journey', 'Keep your applications organized', 'Access protected platform features'].map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
+                <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-teal-600" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -110,7 +109,7 @@ function LoginPage() {
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Login</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -148,7 +147,7 @@ function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || isSubmitting}
-              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               {isSubmitting ? <LoadingSpinner label="Signing in..." size="sm" className="text-white" /> : 'Sign in'}
             </button>

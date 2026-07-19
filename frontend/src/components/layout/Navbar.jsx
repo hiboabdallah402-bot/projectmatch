@@ -1,6 +1,9 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { clearAccessToken, getAccessToken, getAuthChangeEventName } from '../../utils/auth'
+import axiosClient from '../../api/axiosClient'
+import { listNotifications } from '../../api/collaborationApi'
+import ProjectMatchLogoMark from '../common/ProjectMatchLogoMark'
 
 const publicNavItems = [
   { label: 'Explore', to: '/' },
@@ -9,8 +12,11 @@ const publicNavItems = [
 
 function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(getAccessToken()))
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+  const [isSupervisor, setIsSupervisor] = useState(false)
 
   const closeMenu = () => setIsMenuOpen(false)
 
@@ -26,6 +32,30 @@ function Navbar() {
     }
   }, [])
 
+  useEffect(() => {
+    const loadUnreadNotifications = async () => {
+      if (!isAuthenticated) {
+        setUnreadNotifications(0)
+        setIsSupervisor(false)
+        return
+      }
+
+      try {
+        const meResponse = await axiosClient.get('/api/auth/me')
+        setIsSupervisor(Boolean(meResponse.data?.user?.is_supervisor))
+
+        const notifications = await listNotifications()
+        const unreadCount = notifications.filter((notification) => !notification.is_read).length
+        setUnreadNotifications(unreadCount)
+      } catch {
+        setUnreadNotifications(0)
+        setIsSupervisor(false)
+      }
+    }
+
+    loadUnreadNotifications()
+  }, [isAuthenticated, location.pathname])
+
   const handleLogout = () => {
     clearAccessToken()
     closeMenu()
@@ -35,22 +65,25 @@ function Navbar() {
   const navLinkClassName = ({ isActive }) =>
     [
       'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-      isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+      isActive
+        ? 'bg-white text-slate-950 shadow-sm'
+        : 'text-zinc-300 hover:bg-white/10 hover:text-white',
     ].join(' ')
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="inline-flex items-center gap-2" onClick={closeMenu}>
-          <span className="grid h-9 w-9 place-content-center rounded-xl bg-slate-900 text-sm font-bold text-white">
-            PM
+    <header className="sticky top-0 z-30 overflow-x-hidden border-b border-white/10 bg-[#07090d]/85 backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <Link to="/" className="inline-flex min-w-0 items-center gap-2" onClick={closeMenu}>
+          <ProjectMatchLogoMark className="h-10 w-10 shrink-0 shadow-[0_12px_30px_rgba(15,118,110,0.18)]" />
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate text-base font-semibold tracking-tight text-white sm:text-lg">ProjectMatch</span>
+            <span className="truncate text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">Find collaborators</span>
           </span>
-          <span className="text-base font-semibold tracking-tight text-slate-900 sm:text-lg">ProjectMatch</span>
         </Link>
 
         <button
           type="button"
-          className="inline-flex rounded-lg border border-slate-300 p-2 text-slate-700 sm:hidden"
+          className="inline-flex rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-100 sm:hidden"
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav"
           aria-label="Toggle main navigation"
@@ -72,12 +105,31 @@ function Navbar() {
               <NavLink to="/app" className={navLinkClassName}>
                 Workspace
               </NavLink>
+              <NavLink to="/app/collaboration" className={navLinkClassName}>
+                Collaboration
+              </NavLink>
+              <Link
+                to="/app/notifications"
+                className="relative rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+              >
+                Bell
+                {unreadNotifications > 0 ? (
+                  <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                    {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                  </span>
+                ) : null}
+              </Link>
               <NavLink to="/app/profile" className={navLinkClassName}>
                 Profile
               </NavLink>
+              {isSupervisor ? (
+                <NavLink to="/app/supervisor" className={navLinkClassName}>
+                  Supervisor
+                </NavLink>
+              ) : null}
               <button
                 type="button"
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
                 onClick={handleLogout}
               >
                 Logout
@@ -90,7 +142,7 @@ function Navbar() {
               </NavLink>
               <Link
                 to="/register"
-                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-zinc-100"
               >
                 Register
               </Link>
@@ -100,7 +152,7 @@ function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <nav id="mobile-nav" className="border-t border-slate-200 bg-white px-4 py-3 sm:hidden" aria-label="Mobile navigation">
+        <nav id="mobile-nav" className="border-t border-white/10 bg-[#0b0d12] px-4 py-3 sm:hidden" aria-label="Mobile navigation">
           <div className="flex flex-col gap-2">
             {publicNavItems.map((item) => (
               <NavLink
@@ -118,12 +170,23 @@ function Navbar() {
                 <NavLink to="/app" className={navLinkClassName} onClick={closeMenu}>
                   Workspace
                 </NavLink>
+                <NavLink to="/app/collaboration" className={navLinkClassName} onClick={closeMenu}>
+                  Collaboration
+                </NavLink>
+                <NavLink to="/app/notifications" className={navLinkClassName} onClick={closeMenu}>
+                  Notifications {unreadNotifications > 0 ? `(${unreadNotifications})` : ''}
+                </NavLink>
                 <NavLink to="/app/profile" className={navLinkClassName} onClick={closeMenu}>
                   Profile
                 </NavLink>
+                {isSupervisor ? (
+                  <NavLink to="/app/supervisor" className={navLinkClassName} onClick={closeMenu}>
+                    Supervisor
+                  </NavLink>
+                ) : null}
                 <button
                   type="button"
-                  className="rounded-full border border-slate-300 px-4 py-2 text-left text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-left text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
                   onClick={handleLogout}
                 >
                   Logout
@@ -136,7 +199,7 @@ function Navbar() {
                 </NavLink>
                 <Link
                   to="/register"
-                  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                  className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-zinc-100"
                   onClick={closeMenu}
                 >
                   Register

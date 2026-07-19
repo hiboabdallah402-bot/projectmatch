@@ -84,7 +84,7 @@ function ProfileForm({
   }
 
   return (
-    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
       {successMessage ? (
         <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           {successMessage}
@@ -97,10 +97,11 @@ function ProfileForm({
         </div>
       ) : null}
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <label htmlFor="bio" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Bio
         </label>
+        <p className="text-sm leading-6 text-slate-600">Write a concise introduction so teammates understand your background and interests.</p>
         <textarea
           id="bio"
           name="bio"
@@ -113,10 +114,11 @@ function ProfileForm({
         {mergedFieldErrors.bio ? <p className="text-xs font-medium text-rose-700">{mergedFieldErrors.bio}</p> : null}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <label htmlFor="skills" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Skills
         </label>
+        <p className="text-sm leading-6 text-slate-600">List technologies or strengths separated by commas.</p>
         <input
           id="skills"
           name="skills"
@@ -129,10 +131,11 @@ function ProfileForm({
         {mergedFieldErrors.skills ? <p className="text-xs font-medium text-rose-700">{mergedFieldErrors.skills}</p> : null}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <label htmlFor="profile_image" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
           Profile Image URL
         </label>
+        <p className="text-sm leading-6 text-slate-600">Use a public `http` or `https` image link if you want a custom avatar.</p>
         <input
           id="profile_image"
           name="profile_image"
@@ -148,7 +151,7 @@ function ProfileForm({
       <button
         type="submit"
         disabled={isSubmitting || !isFormValid}
-        className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-400"
       >
         {isSubmitting ? <LoadingSpinner label="Saving profile..." size="sm" className="text-white" /> : submitLabel}
       </button>

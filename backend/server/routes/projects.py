@@ -41,6 +41,7 @@ def _serialize_project(project):
 		"required_skills": project.required_skills,
 		"team_size": project.team_size,
 		"status": project.status,
+		"review_status": project.review_status,
 		"created_at": project.created_at.isoformat() if project.created_at else None,
 		"owner_id": project.owner_id,
 	}
@@ -88,6 +89,7 @@ def create_project():
 
 
 @projects_bp.patch("/<int:project_id>")
+@projects_bp.put("/<int:project_id>")
 @jwt_required()
 def update_project(project_id):
 	project, error_response = _get_project_or_404(project_id)

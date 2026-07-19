@@ -9,6 +9,7 @@ from config import config_by_name
 from extensions import cors, db, jwt, migrate
 from routes.applications import applications_bp
 from routes.auth import auth_bp
+from routes.collaboration import collaboration_bp
 from routes.profile import profile_bp
 from routes.projects import projects_bp
 
@@ -40,7 +41,10 @@ def _init_extensions(app: Flask) -> None:
 
     cors.init_app(
         app,
-        resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}},
+        resources={
+            r"/api/*": {"origins": app.config["CORS_ORIGINS"]},
+            r"/health": {"origins": app.config["CORS_ORIGINS"]},
+        },
         supports_credentials=True,
     )
 
@@ -50,6 +54,7 @@ def _register_routes(app: Flask) -> None:
     app.register_blueprint(profile_bp, url_prefix="/api/profile")
     app.register_blueprint(projects_bp, url_prefix="/api/projects")
     app.register_blueprint(applications_bp, url_prefix="/api/applications")
+    app.register_blueprint(collaboration_bp, url_prefix="/api/collaboration")
 
 
 def _register_home_route(app: Flask) -> None:

@@ -21,6 +21,7 @@ def _serialize_user(user):
 		"id": user.id,
 		"full_name": user.full_name,
 		"email": user.email,
+		"is_supervisor": bool(user.is_supervisor),
 		"created_at": user.created_at.isoformat() if user.created_at else None,
 	}
 

@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import axiosClient from '../../api/axiosClient'
 
 const navigationItems = [
   {
@@ -23,6 +24,21 @@ const navigationItems = [
     description: 'View project applications',
   },
   {
+    label: 'Collaboration',
+    to: '/app/collaboration',
+    description: 'Team, tasks, chat, files, and meetings',
+  },
+  {
+    label: 'Notifications',
+    to: '/app/notifications',
+    description: 'View project alerts and updates',
+  },
+  {
+    label: 'Supervisor',
+    to: '/app/supervisor',
+    description: 'Approve or reject project submissions',
+  },
+  {
     label: 'Profile',
     to: '/app/profile',
     description: 'View and edit your profile',
@@ -31,6 +47,25 @@ const navigationItems = [
 
 function DashboardSidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isSupervisor, setIsSupervisor] = useState(false)
+
+  useEffect(() => {
+    const loadRole = async () => {
+      try {
+        const response = await axiosClient.get('/api/auth/me')
+        setIsSupervisor(Boolean(response.data?.user?.is_supervisor))
+      } catch {
+        setIsSupervisor(false)
+      }
+    }
+
+    loadRole()
+  }, [])
+
+  const visibleNavigationItems = useMemo(
+    () => navigationItems.filter((item) => item.to !== '/app/supervisor' || isSupervisor),
+    [isSupervisor],
+  )
 
   const linkClassName = ({ isActive }) =>
     [
@@ -42,23 +77,23 @@ function DashboardSidebar() {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <div className="mb-4 flex items-center justify-between rounded-[1.5rem] border border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Dashboard</p>
           <p className="text-sm font-medium text-slate-900">Navigation</p>
         </div>
         <button
           type="button"
-          className="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
           onClick={() => setIsOpen((open) => !open)}
         >
           {isOpen ? 'Close' : 'Menu'}
         </button>
       </div>
 
-      <aside className={[isOpen ? 'flex' : 'hidden', 'flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:flex lg:w-80'].join(' ')}>
+      <aside className={[isOpen ? 'flex' : 'hidden', 'flex-col rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] lg:flex lg:w-80'].join(' ')}>
         <div className="border-b border-slate-200 pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Workspace</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Workspace</p>
           <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">ProjectMatch Dashboard</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             A focused workspace for managing projects, applications, and your profile.
@@ -66,7 +101,7 @@ function DashboardSidebar() {
         </div>
 
         <nav className="mt-5 flex flex-col gap-2" aria-label="Dashboard navigation">
-          {navigationItems.map((item) => (
+          {visibleNavigationItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

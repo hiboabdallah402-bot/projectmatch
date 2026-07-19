@@ -36,7 +36,7 @@ function ProjectCard({ project, canManage = false, onDelete, isDeleting = false,
 
   return (
     <article
-      className="flex h-full cursor-pointer flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 focus-visible:border-cyan-400 focus-visible:ring-4 focus-visible:ring-cyan-100"
+      className="flex h-full cursor-pointer flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 focus-visible:border-cyan-400 focus-visible:ring-4 focus-visible:ring-cyan-100"
       role="button"
       tabIndex={0}
       onClick={handleCardOpen}
@@ -87,7 +87,7 @@ function ProjectCard({ project, canManage = false, onDelete, isDeleting = false,
           <Link
             to={`/app/projects/${project.id}/edit`}
             aria-label={`Edit ${project.title || 'project'}`}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-950"
           >
             Edit
           </Link>
@@ -96,7 +96,7 @@ function ProjectCard({ project, canManage = false, onDelete, isDeleting = false,
             onClick={() => onDelete?.(project)}
             disabled={isDeleting}
             aria-label={`Delete ${project.title || 'project'}`}
-            className="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
+            className="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-300"
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>

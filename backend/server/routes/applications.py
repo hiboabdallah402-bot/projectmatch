@@ -4,6 +4,7 @@ from sqlalchemy.orm import joinedload
 
 from extensions import db
 from models.application import Application
+from models.collaboration import Notification, TeamMember
 from models.project import Project
 from utils.validators import parse_json_payload, parse_positive_int
 
@@ -75,6 +76,18 @@ def _get_application_or_404(application_id):
 
 def _is_project_owner(application, user_id):
 	return application.project is not None and application.project.owner_id == user_id
+
+
+def _create_notification(user_id, title, message, notif_type, project_id=None):
+	db.session.add(
+		Notification(
+			user_id=user_id,
+			project_id=project_id,
+			title=title,
+			message=message,
+			type=notif_type,
+		)
+	)
 
 
 @applications_bp.get("/<int:application_id>")
@@ -149,6 +162,38 @@ def update_application(application_id):
 		return jsonify({"message": "status must be Accepted or Rejected"}), 400
 
 	application.status = status
+
+	if status == "Accepted":
+		existing_member = TeamMember.query.filter_by(
+			project_id=application.project_id,
+			user_id=application.user_id,
+		).first()
+		if existing_member is None:
+			db.session.add(
+				TeamMember(
+					project_id=application.project_id,
+					user_id=application.user_id,
+					role="Contributor",
+					is_leader=False,
+					added_by_id=current_user_id,
+				)
+			)
+
+		_create_notification(
+			user_id=application.user_id,
+			title="Application accepted",
+			message=f"Your application for project '{application.project.title}' was accepted.",
+			notif_type="application",
+			project_id=application.project_id,
+		)
+	else:
+		_create_notification(
+			user_id=application.user_id,
+			title="Application update",
+			message=f"Your application for project '{application.project.title}' was rejected.",
+			notif_type="application",
+			project_id=application.project_id,
+		)
 	db.session.commit()
 
 	return jsonify({"message": "Application updated", "application": _serialize_application(application)}), 200

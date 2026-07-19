@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import heroImage from '../assets/projectmatch-hero-illustration.svg'
 
 const featureItems = [
   {
@@ -27,59 +28,182 @@ const statistics = [
   { value: '3 steps', label: 'From discovery to application' },
 ]
 
+const heroConcepts = [
+  {
+    title: 'Discover Projects',
+    description: 'Find academic and innovation projects that match your interests, skills, and career goals.',
+  },
+  {
+    title: 'Build Strong Teams',
+    description: 'Create teams, assign roles, review applications, and collaborate effectively.',
+  },
+  {
+    title: 'Manage Projects',
+    description: 'Track tasks, share files, communicate with teammates, and monitor project progress in one place.',
+  },
+  {
+    title: 'AI Project Matching',
+    description: 'Receive intelligent project recommendations based on your skills, interests, and previous experience.',
+  },
+]
+
+const heroHighlights = [
+  'Find projects faster',
+  'Match team needs clearly',
+  'Apply with confidence',
+  'Track progress in one workspace',
+]
+
+const platformHeroCards = [
+  {
+    title: 'Discover Projects',
+    description:
+      'Find academic and innovation projects that match your interests, skills, and career goals.',
+  },
+  {
+    title: 'Build Strong Teams',
+    description: 'Create teams, assign roles, review applications, and collaborate effectively.',
+  },
+  {
+    title: 'Manage Projects',
+    description: 'Track tasks, share files, communicate with teammates, and monitor project progress in one place.',
+  },
+  {
+    title: 'AI Project Matching',
+    description:
+      'Receive intelligent project recommendations based on your skills, interests, and previous experience.',
+    isAi: true,
+  },
+]
+
 function HomePage() {
   return (
     <div className="space-y-20 lg:space-y-24">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 px-6 py-16 text-white shadow-xl sm:px-10 lg:px-16 lg:py-24">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.22),_transparent_34%),radial-gradient(circle_at_bottom_left,_rgba(15,118,110,0.22),_transparent_30%)]" />
-        <div className="relative grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-          <div className="space-y-6">
-            <p className="inline-flex w-fit rounded-full border border-cyan-400/30 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
-              ProjectMatch
-            </p>
-            <div className="space-y-4">
-              <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-                Match students with the right final year project, faster and smarter.
-              </h1>
-              <p className="max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-                Discover project opportunities, connect with collaborators, and move from idea to application in a clean
-                workflow designed for final year teams.
-              </p>
-            </div>
+      <section className="relative overflow-hidden rounded-[2.75rem] border border-zinc-800 bg-black px-6 py-10 text-white shadow-[0_28px_90px_rgba(0,0,0,0.22)] sm:px-10 lg:px-14 lg:py-14">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_center,_rgba(255,255,255,0.08),_transparent_22%),radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_26%),radial-gradient(circle_at_bottom_left,_rgba(34,197,94,0.12),_transparent_22%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-20 bottom-20 flex justify-between px-4 sm:px-8 lg:px-12">
+          <div className="w-px bg-zinc-800/80" />
+          <div className="w-px bg-zinc-800/80" />
+        </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#features"
-                className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition-transform hover:-translate-y-0.5"
+        <div className="relative flex flex-col items-center text-center">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-[#050505] px-3 py-1.5 text-sm text-zinc-100">
+            <div className="relative flex h-3.5 w-3.5 items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </div>
+            <p>Project discovery for modern student teams</p>
+          </div>
+
+          <div className="mt-6 max-w-4xl space-y-5">
+            <h1 className="bg-gradient-to-r from-white via-zinc-100 to-zinc-500 bg-clip-text px-2 text-4xl font-semibold leading-tight text-transparent sm:text-5xl lg:text-[4rem] lg:leading-[1.05]">
+              Collaborate, Build, and Manage Academic Projects in One Platform
+            </h1>
+            <p className="mx-auto max-w-2xl text-sm font-light leading-7 text-zinc-300 sm:text-base sm:leading-8">
+              ProjectMatch is an AI-assisted collaboration platform that helps students discover projects, form teams,
+              manage tasks, share files, communicate, and track progress from project idea to completion.
+            </p>
+          </div>
+
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <a
+              href="#features"
+              className="inline-flex items-center justify-center rounded-lg border border-zinc-700 bg-gradient-to-b from-[#1E1E1E] to-[#050505] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:border-zinc-500"
+            >
+              Explore Projects
+            </a>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-gradient-to-b from-[#1E1E1E] to-[#050505] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:border-zinc-500"
+            >
+              Get Started
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="m5.833 5.832 8.334 8.333m0-8.333v8.333H5.833" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="mt-10 grid w-full gap-3 self-stretch md:grid-cols-2 xl:grid-cols-4">
+            {platformHeroCards.map((concept) => (
+              <article
+                key={concept.title}
+                className={[
+                  'rounded-2xl border p-4 text-left backdrop-blur-sm',
+                  concept.isAi ? 'border-emerald-300/35 bg-emerald-400/10' : 'border-white/10 bg-white/5',
+                ].join(' ')}
               >
-                Explore features
-              </a>
+                <p className="text-sm font-semibold text-white">{concept.title}</p>
+                <p className="mt-1 text-sm leading-6 text-zinc-300">{concept.description}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5 px-2 text-center">
+            <div className="flex">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <svg
+                  key={index}
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="text-amber-400"
+                  aria-hidden="true"
+                >
+                  <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+                </svg>
+              ))}
+            </div>
+            <div className="hidden h-6 w-px bg-white/30 sm:block" />
+            <p className="max-w-3xl text-sm text-zinc-300">
+              Everything students need to discover, build, manage, and successfully complete academic projects in one collaborative workspace.
+            </p>
+          </div>
+
+          <div className="mt-12 w-full border-b border-zinc-800">
+            <div className="pointer-events-none absolute left-0 right-0 -mt-1.5 flex justify-between px-4 sm:px-8 lg:px-12">
+              <div className="h-2.5 w-2.5 rotate-45 bg-white" />
+              <div className="h-2.5 w-2.5 rotate-45 bg-white" />
             </div>
           </div>
 
-          <div className="relative">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <p className="text-sm text-slate-300">Current focus</p>
-                  <p className="text-lg font-semibold text-white">Project discovery</p>
-                </div>
-                <div className="rounded-2xl bg-cyan-400/15 px-3 py-2 text-sm font-semibold text-cyan-200">
-                  Active
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-4">
-                {[
-                  'Search projects by skills and team size',
-                  'Review requirements before applying',
-                  'Submit applications with confidence',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3">
-                    <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
-                    <p className="text-sm text-slate-200">{item}</p>
+          <div className="mt-10 w-full">
+            <div className="rounded-[2rem] bg-[#242424] px-4 py-4 md:px-6 md:py-0 md:pt-8">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+                <div className="rounded-[1.7rem] border border-white/10 bg-black/35 p-4 text-left">
+                  <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+                    <div>
+                      <p className="text-sm text-zinc-400">Hero concept</p>
+                      <p className="text-lg font-semibold text-white">Wide project matching workspace</p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                      Live
+                    </span>
                   </div>
-                ))}
+
+                  <p className="mt-4 text-sm leading-7 text-zinc-300">
+                    Project-specific preview cards now reflect project discovery, matching quality, and application
+                    readiness instead of a generic placeholder graphic.
+                  </p>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                    {heroHighlights.map((item) => (
+                      <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                        <p className="text-sm text-zinc-200">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0d0d0d] p-4">
+                  <img
+                    src={heroImage}
+                    alt="ProjectMatch dashboard preview"
+                    className="h-auto max-h-[32rem] w-full object-contain object-top"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -100,8 +224,8 @@ function HomePage() {
 
         <div className="grid gap-5 md:grid-cols-3">
           {featureItems.map((item) => (
-            <article key={item.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-transform hover:-translate-y-1">
-              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+            <article key={item.title} className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm transition-transform hover:-translate-y-1">
+              <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-sm font-semibold text-slate-950">
                 {item.icon}
               </div>
               <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
@@ -111,33 +235,33 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:grid-cols-3 lg:gap-6">
+      <section className="grid gap-5 rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:grid-cols-3 lg:gap-6">
         {statistics.map((stat) => (
-          <article key={stat.label} className="rounded-2xl bg-slate-50 p-6 text-center">
+          <article key={stat.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
             <p className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">{stat.value}</p>
             <p className="mt-2 text-sm leading-6 text-slate-600">{stat.label}</p>
           </article>
         ))}
       </section>
 
-      <section className="overflow-hidden rounded-3xl bg-slate-950 px-6 py-12 text-white shadow-xl sm:px-10 sm:py-14 lg:px-14">
+      <section className="rounded-[2rem] border border-slate-200 bg-slate-50 px-6 py-12 sm:px-10 sm:py-14 lg:px-14">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">Call to action</p>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Ready to discover your next project?</h2>
-            <p className="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-700">Call to action</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">Ready to discover your next project?</h2>
+            <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
               ProjectMatch will grow into a complete platform for browsing projects, applying, and managing progress.
               The foundation now focuses on a strong public experience.
             </p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-            <Link
-              to="#features"
-              className="inline-flex items-center justify-center rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition-transform hover:-translate-y-0.5"
+            <a
+              href="#features"
+              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
             >
               Review features
-            </Link>
+            </a>
           </div>
         </div>
       </section>

@@ -113,13 +113,13 @@ function ProjectsPage() {
 
         <Link
           to="/app/projects/create"
-          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-900"
         >
           Create project
         </Link>
       </header>
 
-      <section className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
+      <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
         <div className="space-y-2 sm:col-span-2 lg:col-span-1">
           <label htmlFor="project-search" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
             Search
@@ -193,7 +193,7 @@ function ProjectsPage() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-64 animate-pulse rounded-3xl border border-slate-200 bg-slate-100" />
+            <div key={index} className="h-64 animate-pulse rounded-[1.75rem] border border-slate-200 bg-slate-100" />
           ))}
         </div>
       ) : null}

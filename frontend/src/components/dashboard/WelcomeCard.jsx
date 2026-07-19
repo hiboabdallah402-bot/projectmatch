@@ -4,8 +4,7 @@ function WelcomeCard({ userName, isLoading }) {
     : `Welcome${userName ? `, ${userName}` : ''}`
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-8 text-white shadow-sm sm:px-8 sm:py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.25),_transparent_35%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.25),_transparent_38%)]" />
+    <section className="rounded-[2rem] border border-slate-200 bg-slate-950 px-6 py-8 text-white shadow-[0_18px_50px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10">
       <div className="relative space-y-4">
         <p className="inline-flex rounded-full border border-cyan-400/30 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
           Dashboard overview

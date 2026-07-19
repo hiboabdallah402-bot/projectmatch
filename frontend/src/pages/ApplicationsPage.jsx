@@ -6,6 +6,7 @@ import ApplicationSkeletonCard from '../components/applications/ApplicationSkele
 import ApplicationsAlert from '../components/applications/ApplicationsAlert'
 
 function ApplicationsPage() {
+  const [viewScope, setViewScope] = useState('received')
   const [applications, setApplications] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -19,16 +20,16 @@ function ApplicationsPage() {
     setErrorMessage('')
 
     try {
-      const response = await axiosClient.get('/api/applications?scope=received')
-      const receivedApplications = Array.isArray(response.data?.applications) ? response.data.applications : []
-      setApplications(receivedApplications)
+      const response = await axiosClient.get(`/api/applications?scope=${viewScope}`)
+      const scopedApplications = Array.isArray(response.data?.applications) ? response.data.applications : []
+      setApplications(scopedApplications)
     } catch (error) {
       const message = error?.response?.data?.message || 'Unable to load applications right now.'
       setErrorMessage(message)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [viewScope])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -39,6 +40,12 @@ function ApplicationsPage() {
       window.clearTimeout(timeoutId)
     }
   }, [loadApplications])
+
+  useEffect(() => {
+    setActionMessage('')
+    setActionErrorMessage('')
+    setRecentlyUpdatedApplicationId(null)
+  }, [viewScope])
 
   const handleUpdateApplicationStatus = async (applicationId, nextStatus) => {
     if (!applicationId || !nextStatus || processingApplicationId === applicationId) {
@@ -99,8 +106,33 @@ function ApplicationsPage() {
         </p>
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Applications inbox</h1>
         <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-          Review applications for your projects, then accept or reject pending requests without leaving this page.
+          {viewScope === 'received'
+            ? 'Review applications for your projects, then accept or reject pending requests without leaving this page.'
+            : 'Track applications you have submitted to other projects and monitor status updates.'}
         </p>
+
+        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setViewScope('received')}
+            className={[
+              'rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition',
+              viewScope === 'received' ? 'bg-cyan-600 text-white' : 'text-slate-600 hover:bg-slate-100',
+            ].join(' ')}
+          >
+            Received
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewScope('submitted')}
+            className={[
+              'rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition',
+              viewScope === 'submitted' ? 'bg-cyan-600 text-white' : 'text-slate-600 hover:bg-slate-100',
+            ].join(' ')}
+          >
+            Submitted
+          </button>
+        </div>
       </header>
 
       <ApplicationsAlert type="success" message={actionMessage} />
@@ -119,7 +151,14 @@ function ApplicationsPage() {
       ) : null}
 
       {!isLoading && !errorMessage && applications.length === 0 ? (
-        <ApplicationEmptyState />
+        <ApplicationEmptyState
+          title={viewScope === 'received' ? 'No received applications yet' : 'No submitted applications yet'}
+          description={
+            viewScope === 'received'
+              ? 'Your projects have not received applications yet. Share your project links with collaborators to start receiving applicants.'
+              : 'You have not applied to any projects yet. Open the projects page and submit an application to get started.'
+          }
+        />
       ) : null}
 
       {!isLoading && !errorMessage && applications.length > 0 ? (
@@ -130,8 +169,12 @@ function ApplicationsPage() {
               application={application}
               isProcessing={processingApplicationId === application.id}
               isRecentlyUpdated={recentlyUpdatedApplicationId === application.id}
-              onAccept={() => handleUpdateApplicationStatus(application.id, 'Accepted')}
-              onReject={() => handleUpdateApplicationStatus(application.id, 'Rejected')}
+              onAccept={
+                viewScope === 'received' ? () => handleUpdateApplicationStatus(application.id, 'Accepted') : undefined
+              }
+              onReject={
+                viewScope === 'received' ? () => handleUpdateApplicationStatus(application.id, 'Rejected') : undefined
+              }
             />
           ))}
         </div>

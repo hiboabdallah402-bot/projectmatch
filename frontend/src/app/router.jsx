@@ -6,17 +6,20 @@ import ProtectedLayout from '../layouts/ProtectedLayout'
 import PublicLayout from '../layouts/PublicLayout'
 import CreateProjectPage from '../pages/CreateProjectPage'
 import DashboardPage from '../pages/DashboardPage'
+import CollaborationPage from '../pages/CollaborationPage'
 import EditProjectPage from '../pages/EditProjectPage'
 import EditProfilePage from '../pages/EditProfilePage'
 import HomePage from '../pages/HomePage'
 import LoginPage from '../pages/LoginPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import NotificationsPage from '../pages/NotificationsPage'
 import ProjectDetailsPage from '../pages/ProjectDetailsPage'
 import ProfilePage from '../pages/ProfilePage'
 import ProjectsPage from '../pages/ProjectsPage'
 import RegisterPage from '../pages/RegisterPage'
 import ServerErrorPage from '../pages/ServerErrorPage'
 import SetupStatusPage from '../pages/SetupStatusPage'
+import SupervisorPage from '../pages/SupervisorPage'
 
 const router = createBrowserRouter([
   {
@@ -77,6 +80,18 @@ const router = createBrowserRouter([
           {
             path: 'applications',
             element: <ApplicationsPage />,
+          },
+          {
+            path: 'collaboration',
+            element: <CollaborationPage />,
+          },
+          {
+            path: 'notifications',
+            element: <NotificationsPage />,
+          },
+          {
+            path: 'supervisor',
+            element: <SupervisorPage />,
           },
           {
             path: 'profile',

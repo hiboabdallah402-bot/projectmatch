@@ -109,7 +109,7 @@ function EditProfilePage() {
   return (
     <section className="space-y-6">
       <header className="space-y-3">
-        <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+        <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
           Profile
         </p>
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Edit profile</h1>
@@ -118,7 +118,7 @@ function EditProfilePage() {
         </p>
       </header>
 
-      <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <article className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
         {isLoading ? (
           <div className="space-y-4">
             <div className="h-24 animate-pulse rounded-xl bg-slate-100" />

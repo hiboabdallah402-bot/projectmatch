@@ -58,7 +58,7 @@ function ProfilePage() {
     <section className="space-y-6">
       <header className="space-y-3 sm:space-y-0 sm:flex sm:items-start sm:justify-between sm:gap-4">
         <div className="space-y-3">
-          <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+          <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
             Profile
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">View profile</h1>
@@ -69,7 +69,7 @@ function ProfilePage() {
 
         <Link
           to="/app/profile/edit"
-          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900"
         >
           Edit profile
         </Link>
@@ -82,7 +82,7 @@ function ProfilePage() {
       ) : null}
 
       {isLoading ? (
-        <article className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <article className="space-y-6 rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 animate-pulse rounded-2xl bg-slate-100" />
             <div className="space-y-2">
@@ -117,7 +117,7 @@ function ProfilePage() {
       ) : null}
 
       {!isLoading && !errorMessage && user ? (
-        <article className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <article className="space-y-6 rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-wrap items-center gap-4">
             <ProfileAvatar fullName={user.full_name} email={user.email} />
             <div className="space-y-1">

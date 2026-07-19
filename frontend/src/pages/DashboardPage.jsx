@@ -94,10 +94,10 @@ function DashboardPage() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <WelcomeCard userName={userName} isLoading={isLoading} />
 
-      <section className="grid gap-4 xl:grid-cols-[1.15fr_1.85fr]">
+      <section className="grid gap-5 xl:grid-cols-[1.15fr_1.85fr]">
         <UserProfileSummaryCard
           user={user}
           isLoading={isLoading}

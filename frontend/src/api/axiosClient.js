@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { getAccessToken } from '../utils/auth'
+import { clearAccessToken, getAccessToken } from '../utils/auth'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000'
 
@@ -12,6 +12,8 @@ const axiosClient = axios.create({
   withCredentials: false,
 })
 
+let hasHandledUnauthorized = false
+
 axiosClient.interceptors.request.use((config) => {
   const token = getAccessToken()
 
@@ -21,5 +23,26 @@ axiosClient.interceptors.request.use((config) => {
 
   return config
 })
+
+axiosClient.interceptors.response.use(
+  (response) => {
+    hasHandledUnauthorized = false
+    return response
+  },
+  (error) => {
+    const statusCode = error?.response?.status
+
+    if (statusCode === 401) {
+      clearAccessToken()
+
+      if (!hasHandledUnauthorized && window.location.pathname.startsWith('/app')) {
+        hasHandledUnauthorized = true
+        window.location.replace('/login')
+      }
+    }
+
+    return Promise.reject(error)
+  },
+)
 
 export default axiosClient
