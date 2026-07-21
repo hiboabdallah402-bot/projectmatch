@@ -79,22 +79,28 @@ function ProjectForm({
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+    <form className="space-y-6" onSubmit={handleSubmit} noValidate>
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 flex items-start gap-3">
+          <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
           {successMessage}
         </div>
       ) : null}
 
       {backendError ? (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
           {backendError}
         </div>
       ) : null}
 
-      <div className="space-y-2">
-        <label htmlFor="title" className="text-sm font-medium text-slate-700">
-          Title
+      <div className="space-y-3">
+        <label htmlFor="title" className="text-sm font-semibold text-gray-700">
+          Project Title
         </label>
         <input
           id="title"
@@ -102,14 +108,21 @@ function ProjectForm({
           type="text"
           value={formValues.title}
           onChange={updateField}
-          placeholder="Enter project title"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="Enter a clear project title"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {fieldErrors.title ? <p className="text-xs font-medium text-rose-600">{fieldErrors.title}</p> : null}
+        {fieldErrors.title ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {fieldErrors.title}
+          </p>
+        ) : null}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-slate-700">
+      <div className="space-y-3">
+        <label htmlFor="description" className="text-sm font-semibold text-gray-700">
           Description
         </label>
         <textarea
@@ -118,14 +131,21 @@ function ProjectForm({
           rows={5}
           value={formValues.description}
           onChange={updateField}
-          placeholder="Describe your project goals and scope"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="Describe your project goals, scope, and expectations..."
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {fieldErrors.description ? <p className="text-xs font-medium text-rose-600">{fieldErrors.description}</p> : null}
+        {fieldErrors.description ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {fieldErrors.description}
+          </p>
+        ) : null}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="required_skills" className="text-sm font-medium text-slate-700">
+      <div className="space-y-3">
+        <label htmlFor="required_skills" className="text-sm font-semibold text-gray-700">
           Required Skills
         </label>
         <input
@@ -134,14 +154,21 @@ function ProjectForm({
           type="text"
           value={formValues.required_skills}
           onChange={updateField}
-          placeholder="Example: React, Flask, SQL"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="e.g., React, Python, PostgreSQL"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {fieldErrors.required_skills ? <p className="text-xs font-medium text-rose-600">{fieldErrors.required_skills}</p> : null}
+        {fieldErrors.required_skills ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {fieldErrors.required_skills}
+          </p>
+        ) : null}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="team_size" className="text-sm font-medium text-slate-700">
+      <div className="space-y-3">
+        <label htmlFor="team_size" className="text-sm font-semibold text-gray-700">
           Team Size
         </label>
         <input
@@ -152,19 +179,35 @@ function ProjectForm({
           step="1"
           value={formValues.team_size}
           onChange={updateField}
-          placeholder="Enter team size"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="How many team members do you need?"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {fieldErrors.team_size ? <p className="text-xs font-medium text-rose-600">{fieldErrors.team_size}</p> : null}
+        {fieldErrors.team_size ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {fieldErrors.team_size}
+          </p>
+        ) : null}
       </div>
 
-      <button
-        type="submit"
-        disabled={!isFormReady || isSubmitting}
-        className="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-      >
-        {isSubmitting ? <LoadingSpinner label="Submitting..." size="sm" className="text-white" /> : submitLabel}
-      </button>
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={!isFormReady || isSubmitting}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none flex-1"
+        >
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner label="" size="sm" className="text-white" />
+              Submitting...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </button>
+      </div>
     </form>
   )
 }

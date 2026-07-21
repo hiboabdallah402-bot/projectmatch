@@ -109,16 +109,19 @@ function EditProfilePage() {
   return (
     <section className="space-y-6">
       <header className="space-y-3">
-        <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
-          Profile
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Edit profile</h1>
-        <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-          Update supported profile fields such as bio, skills, and profile image.
+        <div className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
+            Profile
+          </span>
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Edit Profile</h1>
+        <p className="max-w-3xl text-sm leading-7 text-gray-600 sm:text-base">
+          Update your bio, skills, and profile image to help teammates get to know you better.
         </p>
       </header>
 
-      <article className="rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
         {isLoading ? (
           <div className="space-y-4">
             <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
@@ -148,7 +151,7 @@ function EditProfilePage() {
             successMessage={successMessage}
           />
         )}
-      </article>
+      </div>
     </section>
   )
 }

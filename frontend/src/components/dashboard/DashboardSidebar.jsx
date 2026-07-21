@@ -1,56 +1,66 @@
 import { NavLink } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import axiosClient from '../../api/axiosClient'
+import {
+  LayoutDashboard,
+  Folder,
+  Inbox,
+  Users,
+  Bell,
+  User,
+  BarChart3,
+  LogOut,
+} from 'lucide-react'
 
 const navigationItems = [
   {
-    label: 'Overview',
+    label: 'Dashboard',
     to: '/app',
-    description: 'Your dashboard home',
+    icon: LayoutDashboard,
   },
   {
     label: 'Projects',
     to: '/app/projects',
-    description: 'Browse all projects',
-  },
-  {
-    label: 'Create Project',
-    to: '/app/projects/create',
-    description: 'Publish a new project',
+    icon: Folder,
   },
   {
     label: 'Applications',
     to: '/app/applications',
-    description: 'View project applications',
+    icon: Inbox,
   },
   {
     label: 'Collaboration',
     to: '/app/collaboration',
-    description: 'Team, tasks, chat, files, and meetings',
+    icon: Users,
   },
   {
     label: 'Notifications',
     to: '/app/notifications',
-    description: 'View project alerts and updates',
-  },
-  {
-    label: 'Supervisor',
-    to: '/app/supervisor',
-    description: 'Approve or reject project submissions',
+    icon: Bell,
   },
   {
     label: 'Profile',
     to: '/app/profile',
-    description: 'View and edit your profile',
+    icon: User,
+  },
+  {
+    label: 'Supervisor',
+    to: '/app/supervisor',
+    icon: BarChart3,
   },
 ]
 
-function DashboardSidebar() {
-  const [isOpen, setIsOpen] = useState(false)
+function DashboardSidebar({ isOpen, onClose }) {
   const [isSupervisor, setIsSupervisor] = useState(false)
 
   useEffect(() => {
     const loadRole = async () => {
+      const token = localStorage.getItem('projectmatch_token')
+      if (!token) {
+        setIsSupervisor(false)
+        return
+      }
+
       try {
         const response = await axiosClient.get('/api/auth/me')
         setIsSupervisor(Boolean(response.data?.user?.is_supervisor))
@@ -69,54 +79,76 @@ function DashboardSidebar() {
 
   const linkClassName = ({ isActive }) =>
     [
-      'flex items-start gap-3 rounded-2xl px-4 py-3 transition-colors',
-      isActive ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+      'flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-all duration-200',
+      isActive
+        ? 'bg-emerald-100 text-emerald-900 font-semibold'
+        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
     ].join(' ')
-
-  const closeSidebar = () => setIsOpen(false)
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between rounded-[1.5rem] border border-slate-200 bg-white px-4 py-3 lg:hidden">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Dashboard</p>
-          <p className="text-sm font-medium text-slate-900">Navigation</p>
-        </div>
-        <button
-          type="button"
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
-          onClick={() => setIsOpen((open) => !open)}
-        >
-          {isOpen ? 'Close' : 'Menu'}
-        </button>
-      </div>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 sm:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
 
-      <aside className={[isOpen ? 'flex' : 'hidden', 'flex-col rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] lg:flex lg:w-80'].join(' ')}>
-        <div className="border-b border-slate-200 pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">Workspace</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">ProjectMatch Dashboard</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            A focused workspace for managing projects, applications, and your profile.
-          </p>
-        </div>
+      {/* Sidebar */}
+      <aside
+        className={`${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-72 transform border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out sm:static sm:top-0 sm:h-auto sm:translate-x-0 sm:transform-none shrink-0`}
+        aria-label="Sidebar"
+      >
+        <div className="flex h-full flex-col overflow-y-auto px-3 py-4">
+          {/* Logo Section */}
+          <div className="mb-6 flex items-center gap-2 border-b border-gray-200 pb-4">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">
+              P
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-gray-900">ProjectMatch</h2>
+              <p className="text-xs text-gray-500">Workspace</p>
+            </div>
+          </div>
 
-        <nav className="mt-5 flex flex-col gap-2" aria-label="Dashboard navigation">
-          {visibleNavigationItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/app'}
-              className={linkClassName}
-              onClick={closeSidebar}
-            >
-              <span className="mt-1 h-2.5 w-2.5 rounded-full bg-current" />
-              <span>
-                <span className="block text-sm font-semibold">{item.label}</span>
-                <span className="mt-1 block text-xs opacity-80">{item.description}</span>
-              </span>
-            </NavLink>
-          ))}
-        </nav>
+          {/* Navigation */}
+          <ul className="space-y-1 font-medium flex-1">
+            {visibleNavigationItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.to === '/app'}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-2 border-emerald-600'
+                          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+                      }`
+                    }
+                    onClick={onClose}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                </li>
+              )
+            })}
+          </ul>
+
+          {/* Footer Tip */}
+          <div className="mt-auto border-t border-gray-200 pt-4">
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3">
+              <p className="text-xs font-semibold text-emerald-900">💡 Tip</p>
+              <p className="mt-1 text-xs text-emerald-800">Use collaboration features to manage your team effectively.</p>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   )

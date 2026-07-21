@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import axiosClient from '../api/axiosClient'
-import ProjectCard from '../components/projects/ProjectCard'
+import { Plus, Search, Filter, MoreVertical, Trash2, Eye, AlertCircle, FolderOpen } from 'lucide-react'
 
 function ProjectsPage() {
   const location = useLocation()
@@ -15,36 +15,22 @@ function ProjectsPage() {
   const [deletingProjectId, setDeletingProjectId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [teamSizeFilter, setTeamSizeFilter] = useState('all')
+  const [openDropdownId, setOpenDropdownId] = useState(null)
   const successMessage = location.state?.successMessage || ''
-
-  const teamSizeOptions = Array.from(
-    new Set(projects.map((project) => Number(project.team_size)).filter((size) => Number.isInteger(size) && size > 0)),
-  ).sort((a, b) => a - b)
 
   const filteredProjects = projects.filter((project) => {
     const query = searchQuery.trim().toLowerCase()
     const titleText = String(project.title || '').toLowerCase()
-    const skillsText = String(project.required_skills || '').toLowerCase()
-    const matchesSearch = !query || titleText.includes(query) || skillsText.includes(query)
-
+    const descText = String(project.description || '').toLowerCase()
+    const matchesSearch = !query || titleText.includes(query) || descText.includes(query)
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter
-
-    const projectTeamSize = Number(project.team_size)
-    const matchesTeamSize =
-      teamSizeFilter === 'all' ||
-      (Number.isInteger(projectTeamSize) && projectTeamSize === Number(teamSizeFilter))
-
-    return matchesSearch && matchesStatus && matchesTeamSize
+    return matchesSearch && matchesStatus
   })
 
   useEffect(() => {
     const loadProjects = async () => {
       setIsLoading(true)
       setErrorMessage('')
-      setActionError('')
-      setActionSuccess('')
-
       try {
         const [projectsResponse, userResponse] = await Promise.all([
           axiosClient.get('/api/projects'),
@@ -54,7 +40,7 @@ function ProjectsPage() {
         setProjects(Array.isArray(projectsResponse.data?.projects) ? projectsResponse.data.projects : [])
         setCurrentUserId(userResponse.data?.user?.id ?? null)
       } catch (error) {
-        const message = error?.response?.data?.message || 'Unable to load projects at the moment.'
+        const message = error?.response?.data?.message || 'Unable to load projects.'
         setErrorMessage(message)
       } finally {
         setIsLoading(false)
@@ -65,171 +51,267 @@ function ProjectsPage() {
   }, [location.state?.refreshProjects])
 
   const handleDeleteProject = async (project) => {
-    if (!project?.id) {
-      return
-    }
-
-    const shouldDelete = window.confirm(`Delete project "${project.title || 'Untitled project'}"?`)
-    if (!shouldDelete) {
-      return
-    }
+    if (!project?.id) return
+    const shouldDelete = window.confirm(`Delete project "${project.title || 'Untitled'}"?`)
+    if (!shouldDelete) return
 
     setDeletingProjectId(project.id)
     setActionError('')
-    setActionSuccess('')
-
     try {
       await axiosClient.delete(`/api/projects/${project.id}`)
       setProjects((previous) => previous.filter((item) => item.id !== project.id))
       setActionSuccess('Project deleted successfully.')
+      setOpenDropdownId(null)
     } catch (error) {
-      const message = error?.response?.data?.message || 'Unable to delete project right now.'
+      const message = error?.response?.data?.message || 'Unable to delete project.'
       setActionError(message)
     } finally {
       setDeletingProjectId(null)
     }
   }
 
-  const handleOpenDetails = (project) => {
-    if (!project?.id) {
-      return
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      open: 'bg-blue-50 text-blue-700 border-blue-200',
+      in_progress: 'bg-purple-50 text-purple-700 border-purple-200',
+      completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      closed: 'bg-gray-50 text-gray-700 border-gray-200',
     }
-
-    navigate(`/app/projects/${project.id}`)
+    const statusLabels = {
+      open: 'Open',
+      in_progress: 'In Progress',
+      completed: 'Completed',
+      closed: 'Closed',
+    }
+    const style = statusStyles[status] || statusStyles.open
+    return (
+      <span className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${style}`}>
+        {statusLabels[status] || status}
+      </span>
+    )
   }
 
   return (
     <section className="space-y-6">
-      <header className="space-y-3 sm:space-y-0 sm:flex sm:items-start sm:justify-between sm:gap-4">
-        <div className="space-y-3">
-          <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-            Projects
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">View all projects</h1>
-          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            Browse current projects published on ProjectMatch. Search and filter by status, team size, and required skills to quickly find relevant opportunities.
-          </p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <p className="mt-1 text-gray-600">Manage and explore all projects</p>
         </div>
-
         <Link
           to="/app/projects/create"
-          className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-900"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all"
         >
-          Create project
+          <Plus className="h-4 w-4" />
+          Create Project
         </Link>
-      </header>
+      </div>
 
-      <section className="grid gap-3 rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
-        <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-          <label htmlFor="project-search" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-            Search
-          </label>
-          <input
-            id="project-search"
-            type="text"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search title or required skills"
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
-          />
+      {/* Filters & Search */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Search</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by title or description..."
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 pl-10 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none transition"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-400" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 outline-none transition"
+              >
+                <option value="all">All statuses</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <label htmlFor="status-filter" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-            Status
-          </label>
-          <select
-            id="status-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
-          >
-            <option value="all">All statuses</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="closed">Closed</option>
-          </select>
+      {/* Messages */}
+      {successMessage && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          ✓ {successMessage}
         </div>
-
-        <div className="space-y-2">
-          <label htmlFor="team-size-filter" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-            Team size
-          </label>
-          <select
-            id="team-size-filter"
-            value={teamSizeFilter}
-            onChange={(event) => setTeamSizeFilter(event.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
-          >
-            <option value="all">All sizes</option>
-            {teamSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+      )}
+      {actionSuccess && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          ✓ {actionSuccess}
         </div>
-      </section>
-
-      {successMessage ? (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-          {successMessage}
+      )}
+      {actionError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>{actionError}</div>
         </div>
-      ) : null}
-
-      {actionSuccess ? (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-          {actionSuccess}
+      )}
+      {errorMessage && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>{errorMessage}</div>
         </div>
-      ) : null}
+      )}
 
-      {actionError ? (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-          {actionError}
-        </div>
-      ) : null}
-
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-64 animate-pulse rounded-[1.75rem] border border-slate-200 bg-slate-100" />
+      {/* Loading State */}
+      {isLoading && (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-lg border border-gray-200 bg-gray-50 animate-pulse" />
           ))}
         </div>
-      ) : null}
+      )}
 
-      {!isLoading && errorMessage ? (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-          {errorMessage}
+      {/* Empty States */}
+      {!isLoading && errorMessage && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-3 text-sm font-medium text-gray-900">Unable to load projects</p>
+          <p className="mt-1 text-xs text-gray-500">{errorMessage}</p>
         </div>
-      ) : null}
+      )}
 
-      {!isLoading && !errorMessage && projects.length === 0 ? (
-        <div className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-          No projects are available yet.
+      {!isLoading && !errorMessage && projects.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <FolderOpen className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-3 text-sm font-medium text-gray-900">No projects yet</p>
+          <p className="mt-1 text-xs text-gray-500">Create your first project to get started</p>
+          <Link
+            to="/app/projects/create"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            <Plus className="h-4 w-4" />
+            Create Project
+          </Link>
         </div>
-      ) : null}
+      )}
 
-      {!isLoading && !errorMessage && projects.length > 0 && filteredProjects.length === 0 ? (
-        <div className="rounded-2xl border border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600">
-          No projects match your current search and filter criteria.
+      {!isLoading && !errorMessage && projects.length > 0 && filteredProjects.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <Search className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-3 text-sm font-medium text-gray-900">No projects found</p>
+          <p className="mt-1 text-xs text-gray-500">Try adjusting your search or filters</p>
         </div>
-      ) : null}
+      )}
 
-      {!isLoading && !errorMessage && filteredProjects.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              canManage={currentUserId === project.owner_id}
-              onDelete={handleDeleteProject}
-              isDeleting={deletingProjectId === project.id}
-              onOpenDetails={handleOpenDetails}
-            />
-          ))}
+      {/* Table */}
+      {!isLoading && !errorMessage && filteredProjects.length > 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Project
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Team Size
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project) => (
+                  <tr
+                    key={project.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="max-w-sm">
+                        <p className="font-semibold text-gray-900">{project.title}</p>
+                        <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                          {project.description}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {getStatusBadge(project.status)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-700">{project.team_size || '—'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-500">
+                        {project.created_at ? new Date(project.created_at).toLocaleDateString() : '—'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end">
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenDropdownId(openDropdownId === project.id ? null : project.id)}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <MoreVertical className="h-4 w-4 text-gray-500" />
+                          </button>
+                          {openDropdownId === project.id && (
+                            <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg z-10">
+                              <button
+                                onClick={() => {
+                                  navigate(`/app/projects/${project.id}`)
+                                  setOpenDropdownId(null)
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition border-b border-gray-100"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View Details
+                              </button>
+                              {currentUserId === project.owner_id && (
+                                <>
+                                  <Link
+                                    to={`/app/projects/${project.id}/edit`}
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition border-b border-gray-100"
+                                  >
+                                    Edit Project
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      handleDeleteProject(project)
+                                      setOpenDropdownId(null)
+                                    }}
+                                    disabled={deletingProjectId === project.id}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    {deletingProjectId === project.id ? 'Deleting...' : 'Delete'}
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      ) : null}
+      )}
     </section>
   )
 }

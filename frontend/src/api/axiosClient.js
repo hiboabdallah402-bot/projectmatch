@@ -31,6 +31,17 @@ axiosClient.interceptors.response.use(
   },
   (error) => {
     const statusCode = error?.response?.status
+    const url = error?.config?.url
+
+    // Handle 404 on /api/auth/me - token is invalid, user doesn't exist, or session expired
+    if (statusCode === 404 && url?.includes('/api/auth/me')) {
+      clearAccessToken()
+
+      if (!hasHandledUnauthorized && window.location.pathname.startsWith('/app')) {
+        hasHandledUnauthorized = true
+        window.location.replace('/login')
+      }
+    }
 
     if (statusCode === 401) {
       clearAccessToken()

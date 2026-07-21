@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import axiosClient from '../api/axiosClient'
-import ApplicationCard from '../components/applications/ApplicationCard'
-import ApplicationEmptyState from '../components/applications/ApplicationEmptyState'
-import ApplicationSkeletonCard from '../components/applications/ApplicationSkeletonCard'
-import ApplicationsAlert from '../components/applications/ApplicationsAlert'
+import { Check, X, AlertCircle, Inbox } from 'lucide-react'
 
 function ApplicationsPage() {
   const [viewScope, setViewScope] = useState('received')
@@ -13,7 +10,6 @@ function ApplicationsPage() {
   const [actionMessage, setActionMessage] = useState('')
   const [actionErrorMessage, setActionErrorMessage] = useState('')
   const [processingApplicationId, setProcessingApplicationId] = useState(null)
-  const [recentlyUpdatedApplicationId, setRecentlyUpdatedApplicationId] = useState(null)
 
   const loadApplications = useCallback(async () => {
     setIsLoading(true)
@@ -24,7 +20,7 @@ function ApplicationsPage() {
       const scopedApplications = Array.isArray(response.data?.applications) ? response.data.applications : []
       setApplications(scopedApplications)
     } catch (error) {
-      const message = error?.response?.data?.message || 'Unable to load applications right now.'
+      const message = error?.response?.data?.message || 'Unable to load applications.'
       setErrorMessage(message)
     } finally {
       setIsLoading(false)
@@ -44,7 +40,6 @@ function ApplicationsPage() {
   useEffect(() => {
     setActionMessage('')
     setActionErrorMessage('')
-    setRecentlyUpdatedApplicationId(null)
   }, [viewScope])
 
   const handleUpdateApplicationStatus = async (applicationId, nextStatus) => {
@@ -77,108 +72,212 @@ function ApplicationsPage() {
 
       const successMessage = response.data?.message || `Application ${nextStatus.toLowerCase()}.`
       setActionMessage(successMessage)
-      setRecentlyUpdatedApplicationId(applicationId)
     } catch (error) {
-      const message = error?.response?.data?.message || 'Unable to update application right now.'
+      const message = error?.response?.data?.message || 'Unable to update application.'
       setActionErrorMessage(message)
     } finally {
       setProcessingApplicationId(null)
     }
   }
 
-  useEffect(() => {
-    if (!recentlyUpdatedApplicationId) {
-      return undefined
+  const getStatusBadge = (status) => {
+    const statusStyles = {
+      'Pending': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+      'Accepted': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'Rejected': 'bg-red-50 text-red-700 border-red-200',
+      'Withdrawn': 'bg-gray-50 text-gray-700 border-gray-200',
     }
-
-    const timeoutId = window.setTimeout(() => {
-      setRecentlyUpdatedApplicationId(null)
-    }, 900)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [recentlyUpdatedApplicationId])
+    const style = statusStyles[status] || statusStyles['Pending']
+    return (
+      <span className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${style}`}>
+        {status}
+      </span>
+    )
+  }
 
   return (
     <section className="space-y-6">
-      <header className="space-y-3">
-        <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-          Applications
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Applications inbox</h1>
-        <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Applications</h1>
+        <p className="mt-1 text-gray-600">
           {viewScope === 'received'
-            ? 'Review applications for your projects, then accept or reject pending requests without leaving this page.'
-            : 'Track applications you have submitted to other projects and monitor status updates.'}
+            ? 'Review and respond to applications for your projects'
+            : 'Track the status of applications you have submitted'}
         </p>
+      </div>
 
-        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-          <button
-            type="button"
-            onClick={() => setViewScope('received')}
-            className={[
-              'rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition',
-              viewScope === 'received' ? 'bg-cyan-600 text-white' : 'text-slate-600 hover:bg-slate-100',
-            ].join(' ')}
-          >
-            Received
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewScope('submitted')}
-            className={[
-              'rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition',
-              viewScope === 'submitted' ? 'bg-cyan-600 text-white' : 'text-slate-600 hover:bg-slate-100',
-            ].join(' ')}
-          >
-            Submitted
-          </button>
-        </div>
-      </header>
-
-      <ApplicationsAlert type="success" message={actionMessage} />
-      <ApplicationsAlert type="error" message={actionErrorMessage} />
-
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <ApplicationSkeletonCard key={`skeleton-${index}`} />
-          ))}
-        </div>
-      ) : null}
-
-      {!isLoading && errorMessage ? (
-        <ApplicationsAlert type="error" message={errorMessage} actionLabel="Retry" onAction={loadApplications} isActionDisabled={isLoading} />
-      ) : null}
-
-      {!isLoading && !errorMessage && applications.length === 0 ? (
-        <ApplicationEmptyState
-          title={viewScope === 'received' ? 'No received applications yet' : 'No submitted applications yet'}
-          description={
+      {/* View Tabs */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setViewScope('received')}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
             viewScope === 'received'
-              ? 'Your projects have not received applications yet. Share your project links with collaborators to start receiving applicants.'
-              : 'You have not applied to any projects yet. Open the projects page and submit an application to get started.'
-          }
-        />
-      ) : null}
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Received
+        </button>
+        <button
+          onClick={() => setViewScope('submitted')}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
+            viewScope === 'submitted'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Submitted
+        </button>
+      </div>
 
-      {!isLoading && !errorMessage && applications.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
-          {applications.map((application) => (
-            <ApplicationCard
-              key={application.id}
-              application={application}
-              isProcessing={processingApplicationId === application.id}
-              isRecentlyUpdated={recentlyUpdatedApplicationId === application.id}
-              onAccept={
-                viewScope === 'received' ? () => handleUpdateApplicationStatus(application.id, 'Accepted') : undefined
-              }
-              onReject={
-                viewScope === 'received' ? () => handleUpdateApplicationStatus(application.id, 'Rejected') : undefined
-              }
-            />
+      {/* Messages */}
+      {actionMessage && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          ✓ {actionMessage}
+        </div>
+      )}
+      {actionErrorMessage && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>{actionErrorMessage}</div>
+        </div>
+      )}
+      {errorMessage && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>{errorMessage}</div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-lg border border-gray-200 bg-gray-50 animate-pulse" />
           ))}
         </div>
-      ) : null}
+      )}
+
+      {/* Empty States */}
+      {!isLoading && errorMessage && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-3 text-sm font-medium text-gray-900">Unable to load applications</p>
+          <p className="mt-1 text-xs text-gray-500">{errorMessage}</p>
+        </div>
+      )}
+
+      {!isLoading && !errorMessage && applications.length === 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <Inbox className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-3 text-sm font-medium text-gray-900">
+            {viewScope === 'received' ? 'No applications yet' : 'No submitted applications yet'}
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            {viewScope === 'received'
+              ? 'Applications will appear here when students apply to your projects'
+              : 'Applications you submit will appear here'}
+          </p>
+        </div>
+      )}
+
+      {/* Table */}
+      {!isLoading && !errorMessage && applications.length > 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    {viewScope === 'received' ? 'Applicant' : 'Project'}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    {viewScope === 'received' ? 'Project' : 'Applicant'}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Applied
+                  </th>
+                  {viewScope === 'received' && (
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app) => (
+                  <tr
+                    key={app.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <p className="font-semibold text-gray-900">
+                        {viewScope === 'received' ? app.user?.full_name : app.project?.title}
+                      </p>
+                      {viewScope === 'received' && (
+                        <p className="mt-0.5 text-xs text-gray-500">{app.user?.email}</p>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="font-semibold text-gray-900">
+                        {viewScope === 'received' ? app.project?.title : app.user?.full_name}
+                      </p>
+                      {viewScope !== 'received' && (
+                        <p className="mt-0.5 text-xs text-gray-500">{app.user?.email}</p>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {getStatusBadge(app.status)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-500">
+                        {app.created_at ? new Date(app.created_at).toLocaleDateString() : '—'}
+                      </span>
+                    </td>
+                    {viewScope === 'received' && (
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          {app.status === 'Pending' && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleUpdateApplicationStatus(app.id, 'Accepted')
+                                }
+                                disabled={processingApplicationId === app.id}
+                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition"
+                              >
+                                <Check className="h-4 w-4" />
+                                Accept
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleUpdateApplicationStatus(app.id, 'Rejected')
+                                }
+                                disabled={processingApplicationId === app.id}
+                                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-50 transition"
+                              >
+                                <X className="h-4 w-4" />
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          {app.status !== 'Pending' && (
+                            <span className="text-xs text-gray-500 italic">No actions available</span>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

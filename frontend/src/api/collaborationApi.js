@@ -119,3 +119,8 @@ export async function listReports(projectId) {
   const response = await axiosClient.get(`${collaborationBase}/projects/${projectId}/reports`)
   return unwrapResponse(response, 'reports', [])
 }
+
+export async function seedProjectDemoData(projectId) {
+  const response = await axiosClient.post(`${collaborationBase}/projects/${projectId}/seed-demo`)
+  return response?.data || null
+}

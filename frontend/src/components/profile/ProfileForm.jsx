@@ -86,56 +86,76 @@ function ProfileForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit} noValidate>
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 flex items-start gap-3">
+          <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
           {successMessage}
         </div>
       ) : null}
 
       {backendError ? (
-        <div className="rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 flex items-start gap-3">
+          <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
           {backendError}
         </div>
       ) : null}
 
-      <div className="space-y-2.5">
-        <label htmlFor="bio" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <div className="space-y-3">
+        <label htmlFor="bio" className="text-sm font-semibold text-gray-700">
           Bio
         </label>
-        <p className="text-sm leading-6 text-slate-600">Write a concise introduction so teammates understand your background and interests.</p>
+        <p className="text-xs text-gray-500">Tell teammates about yourself and your interests</p>
         <textarea
           id="bio"
           name="bio"
           rows={4}
           value={formValues.bio}
           onChange={handleChange}
-          placeholder="Share a short introduction"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="Share a short introduction..."
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {mergedFieldErrors.bio ? <p className="text-xs font-medium text-rose-700">{mergedFieldErrors.bio}</p> : null}
+        {mergedFieldErrors.bio ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {mergedFieldErrors.bio}
+          </p>
+        ) : null}
       </div>
 
-      <div className="space-y-2.5">
-        <label htmlFor="skills" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <div className="space-y-3">
+        <label htmlFor="skills" className="text-sm font-semibold text-gray-700">
           Skills
         </label>
-        <p className="text-sm leading-6 text-slate-600">List technologies or strengths separated by commas.</p>
+        <p className="text-xs text-gray-500">Comma-separated list of your skills and technologies</p>
         <input
           id="skills"
           name="skills"
           type="text"
           value={formValues.skills}
           onChange={handleChange}
-          placeholder="Example: React, Flask, PostgreSQL"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          placeholder="e.g., React, Python, PostgreSQL"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {mergedFieldErrors.skills ? <p className="text-xs font-medium text-rose-700">{mergedFieldErrors.skills}</p> : null}
+        {mergedFieldErrors.skills ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {mergedFieldErrors.skills}
+          </p>
+        ) : null}
       </div>
 
-      <div className="space-y-2.5">
-        <label htmlFor="profile_image" className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <div className="space-y-3">
+        <label htmlFor="profile_image" className="text-sm font-semibold text-gray-700">
           Profile Image URL
         </label>
-        <p className="text-sm leading-6 text-slate-600">Use a public `http` or `https` image link if you want a custom avatar.</p>
+        <p className="text-xs text-gray-500">Use a public image link (http or https) for a custom avatar</p>
         <input
           id="profile_image"
           name="profile_image"
@@ -143,18 +163,34 @@ function ProfileForm({
           value={formValues.profile_image}
           onChange={handleChange}
           placeholder="https://example.com/avatar.jpg"
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
-        {mergedFieldErrors.profile_image ? <p className="text-xs font-medium text-rose-700">{mergedFieldErrors.profile_image}</p> : null}
+        {mergedFieldErrors.profile_image ? (
+          <p className="text-xs font-medium text-red-600 flex items-center gap-1">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {mergedFieldErrors.profile_image}
+          </p>
+        ) : null}
       </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting || !isFormValid}
-        className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-400"
-      >
-        {isSubmitting ? <LoadingSpinner label="Saving profile..." size="sm" className="text-white" /> : submitLabel}
-      </button>
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting || !isFormValid}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
+        >
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner label="" size="sm" className="text-white" />
+              Saving...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </button>
+      </div>
     </form>
   )
 }

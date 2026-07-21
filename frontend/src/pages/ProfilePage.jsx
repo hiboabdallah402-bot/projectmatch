@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import axiosClient from '../api/axiosClient'
 import ProfileAvatar from '../components/profile/ProfileAvatar'
+import { getCurrentUserProfile } from '../api/profileApi'
 
 function formatJoinedDate(createdAt) {
   if (!createdAt) {
@@ -23,16 +23,24 @@ function formatJoinedDate(createdAt) {
 function ProfilePage() {
   const location = useLocation()
   const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
   const loadProfile = useCallback(async () => {
+    const token = localStorage.getItem('projectmatch_token')
+    if (!token) {
+      setIsLoading(false)
+      return
+    }
+
     setIsLoading(true)
     setErrorMessage('')
 
     try {
-      const response = await axiosClient.get('/api/auth/me')
-      setUser(response.data?.user || null)
+      const { user: userData, profile: profileData } = await getCurrentUserProfile()
+      setUser(userData || null)
+      setProfile(profileData || null)
     } catch (error) {
       const message = error?.response?.data?.message || 'Unable to load profile right now.'
       setErrorMessage(message)
@@ -58,25 +66,34 @@ function ProfilePage() {
     <section className="space-y-6">
       <header className="space-y-3 sm:space-y-0 sm:flex sm:items-start sm:justify-between sm:gap-4">
         <div className="space-y-3">
-          <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
-            Profile
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">View profile</h1>
-          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            Review your account information and update your profile details.
+          <div className="inline-flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
+              Profile
+            </span>
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">My Profile</h1>
+          <p className="max-w-3xl text-sm leading-7 text-gray-600 sm:text-base">
+            View your account information and profile details.
           </p>
         </div>
 
         <Link
           to="/app/profile/edit"
-          className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-900"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 hover:shadow-lg"
         >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
           Edit profile
         </Link>
       </header>
 
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 flex items-start gap-3">
+          <svg className="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
           {successMessage}
         </div>
       ) : null}
@@ -141,6 +158,20 @@ function ProfilePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date Joined</p>
               <p className="mt-1 text-sm font-medium text-slate-900">{joinedDate}</p>
             </div>
+
+            {profile?.bio && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Bio</p>
+                <p className="mt-1 text-sm font-medium text-slate-900 line-clamp-2">{profile.bio}</p>
+              </div>
+            )}
+
+            {profile?.skills && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Skills</p>
+                <p className="mt-1 text-sm font-medium text-slate-900 line-clamp-2">{profile.skills}</p>
+              </div>
+            )}
           </div>
         </article>
       ) : null}

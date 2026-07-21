@@ -1,6 +1,11 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { clearAccessToken, getAccessToken, getAuthChangeEventName } from '../../utils/auth'
+import {
+  clearAccessToken,
+  getAccessToken,
+  getAuthChangeEventName,
+  getNotificationsChangeEventName,
+} from '../../utils/auth'
 import axiosClient from '../../api/axiosClient'
 import { listNotifications } from '../../api/collaborationApi'
 import ProjectMatchLogoMark from '../common/ProjectMatchLogoMark'
@@ -54,6 +59,12 @@ function Navbar() {
     }
 
     loadUnreadNotifications()
+
+    window.addEventListener(getNotificationsChangeEventName(), loadUnreadNotifications)
+
+    return () => {
+      window.removeEventListener(getNotificationsChangeEventName(), loadUnreadNotifications)
+    }
   }, [isAuthenticated, location.pathname])
 
   const handleLogout = () => {
@@ -112,7 +123,7 @@ function Navbar() {
                 to="/app/notifications"
                 className="relative rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
               >
-                Bell
+                Notifications
                 {unreadNotifications > 0 ? (
                   <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
                     {unreadNotifications > 99 ? '99+' : unreadNotifications}

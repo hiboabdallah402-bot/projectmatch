@@ -61,16 +61,19 @@ function CreateProjectPage() {
   return (
     <section className="space-y-6">
       <header className="space-y-3">
-        <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-          Projects
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Create project</h1>
-        <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-          Publish a new project for collaboration. You can edit additional project details in a later phase.
+        <div className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
+            Projects
+          </span>
+        </div>
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Create New Project</h1>
+        <p className="max-w-3xl text-sm leading-7 text-gray-600 sm:text-base">
+          Publish your project and find the right collaborators for your team.
         </p>
       </header>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
         <ProjectForm
           onSubmit={handleCreateProject}
           submitLabel="Create project"
