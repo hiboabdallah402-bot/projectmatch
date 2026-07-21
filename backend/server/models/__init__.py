@@ -1,3 +1,4 @@
+from models.activity import Activity
 from models.application import Application
 from models.collaboration import (
 	Notification,

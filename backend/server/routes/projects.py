@@ -3,6 +3,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from extensions import db
 from models.project import Project
+from services import log_activity
 from utils.validators import (
 	parse_json_payload,
 	parse_positive_int,
@@ -83,6 +84,16 @@ def create_project():
 		owner_id=int(get_jwt_identity()),
 	)
 	db.session.add(project)
+	db.session.flush()  # Flush to get project.id before commit
+
+	# Log the activity
+	log_activity(
+		actor_user_id=int(get_jwt_identity()),
+		activity_type="project_created",
+		description=f"Created project '{title}'",
+		project_id=project.id,
+	)
+
 	db.session.commit()
 
 	return jsonify({"message": "Project created", "project": _serialize_project(project)}), 201

@@ -191,14 +191,22 @@ class Notification(db.Model):
 		nullable=True,
 		index=True,
 	)
+	application_id = db.Column(
+		db.Integer,
+		db.ForeignKey("applications.id", ondelete="CASCADE"),
+		nullable=True,
+		index=True,
+	)
 	type = db.Column(db.String(50), nullable=False)
 	title = db.Column(db.String(180), nullable=False)
 	message = db.Column(db.Text, nullable=False)
+	priority = db.Column(db.String(20), nullable=False, default="normal")  # normal, high, urgent
 	is_read = db.Column(db.Boolean, nullable=False, default=False)
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 	user = db.relationship("User", back_populates="notifications")
 	project = db.relationship("Project")
+	application = db.relationship("Application")
 
 
 class ProjectReport(db.Model):

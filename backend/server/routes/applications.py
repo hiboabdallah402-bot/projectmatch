@@ -6,6 +6,8 @@ from extensions import db
 from models.application import Application
 from models.collaboration import Notification, TeamMember
 from models.project import Project
+from models.user import User
+from services import log_activity, create_notification
 from utils.validators import parse_json_payload, parse_positive_int
 
 
@@ -78,18 +80,6 @@ def _is_project_owner(application, user_id):
 	return application.project is not None and application.project.owner_id == user_id
 
 
-def _create_notification(user_id, title, message, notif_type, project_id=None):
-	db.session.add(
-		Notification(
-			user_id=user_id,
-			project_id=project_id,
-			title=title,
-			message=message,
-			type=notif_type,
-		)
-	)
-
-
 @applications_bp.get("/<int:application_id>")
 @jwt_required()
 def get_application(application_id):
@@ -136,6 +126,31 @@ def create_application():
 
 	application = Application(user_id=current_user_id, project_id=project.id, status="Pending")
 	db.session.add(application)
+	db.session.flush()  # Get application.id before commit
+
+	# Get the current user for the activity
+	current_user = db.session.get(User, current_user_id)
+
+	# Log the activity
+	log_activity(
+		actor_user_id=current_user_id,
+		activity_type="application_submitted",
+		description=f"Applied to project '{project.title}'",
+		project_id=project.id,
+		application_id=application.id,
+	)
+
+	# Notify project owner
+	create_notification(
+		user_id=project.owner_id,
+		notification_type="application_submitted",
+		title=f"New application from {current_user.full_name if current_user else 'Unknown'}",
+		message=f"Someone applied to your project '{project.title}'",
+		priority="high",
+		project_id=project.id,
+		application_id=application.id,
+	)
+
 	db.session.commit()
 
 	return jsonify({"message": "Application submitted", "application": _serialize_application(application)}), 201
@@ -179,20 +194,55 @@ def update_application(application_id):
 				)
 			)
 
-		_create_notification(
-			user_id=application.user_id,
-			title="Application accepted",
-			message=f"Your application for project '{application.project.title}' was accepted.",
-			notif_type="application",
+		# Check if project has reached team_size with accepted applications
+		accepted_count = Application.query.filter_by(
 			project_id=application.project_id,
+			status="Accepted"
+		).count()
+		
+		if accepted_count >= application.project.team_size:
+			application.project.status = "closed"
+
+		# Log the activity
+		log_activity(
+			actor_user_id=current_user_id,
+			activity_type="application_accepted",
+			description=f"Accepted application from {application.user.full_name if application.user else 'Unknown'} for project '{application.project.title}'",
+			target_user_id=application.user_id,
+			project_id=application.project_id,
+			application_id=application.id,
+		)
+
+		# Notify applicant
+		create_notification(
+			user_id=application.user_id,
+			notification_type="application_accepted",
+			title="Application accepted",
+			message=f"Your application for project '{application.project.title}' was accepted!",
+			priority="high",
+			project_id=application.project_id,
+			application_id=application.id,
 		)
 	else:
-		_create_notification(
-			user_id=application.user_id,
-			title="Application update",
-			message=f"Your application for project '{application.project.title}' was rejected.",
-			notif_type="application",
+		# Log the activity
+		log_activity(
+			actor_user_id=current_user_id,
+			activity_type="application_rejected",
+			description=f"Rejected application from {application.user.full_name if application.user else 'Unknown'} for project '{application.project.title}'",
+			target_user_id=application.user_id,
 			project_id=application.project_id,
+			application_id=application.id,
+		)
+
+		# Notify applicant
+		create_notification(
+			user_id=application.user_id,
+			notification_type="application_rejected",
+			title="Application update",
+			message=f"Your application for project '{application.project.title}' was not accepted at this time.",
+			priority="normal",
+			project_id=application.project_id,
+			application_id=application.id,
 		)
 	db.session.commit()
 

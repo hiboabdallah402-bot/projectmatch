@@ -836,6 +836,251 @@ def _build_report_payload(project):
     }
 
 
+def _seed_team_members(project, current_user_id):
+    created = 0
+
+    existing_member = TeamMember.query.filter_by(project_id=project.id, user_id=current_user_id).first()
+    if existing_member is None:
+        db.session.add(
+            TeamMember(
+                project_id=project.id,
+                user_id=current_user_id,
+                role="Project Manager",
+                is_leader=True,
+                added_by_id=current_user_id,
+            )
+        )
+        created += 1
+
+    # Add up to 2 additional users if available so team tab has realistic sample records.
+    candidates = (
+        User.query.filter(User.id != current_user_id)
+        .order_by(User.id.asc())
+        .limit(2)
+        .all()
+    )
+    candidate_roles = ["Backend Developer", "Frontend Developer"]
+
+    for index, user in enumerate(candidates):
+        existing = TeamMember.query.filter_by(project_id=project.id, user_id=user.id).first()
+        if existing is None:
+            db.session.add(
+                TeamMember(
+                    project_id=project.id,
+                    user_id=user.id,
+                    role=candidate_roles[index % len(candidate_roles)],
+                    is_leader=False,
+                    added_by_id=current_user_id,
+                )
+            )
+            created += 1
+
+    return created
+
+
+def _seed_tasks(project, current_user_id):
+    if ProjectTask.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    team_members = TeamMember.query.filter_by(project_id=project.id).order_by(TeamMember.id.asc()).all()
+    assignees = [member.user_id for member in team_members] or [current_user_id]
+
+    task_templates = [
+        ("Build authentication middleware", "Implement JWT validation and permission checks.", "in_progress"),
+        ("Design dashboard UI cards", "Create polished card views for project metrics.", "to_do"),
+        ("Review API error handling", "Standardize backend error response structure.", "completed"),
+    ]
+
+    for index, (title, description, status) in enumerate(task_templates):
+        db.session.add(
+            ProjectTask(
+                project_id=project.id,
+                title=title,
+                description=description,
+                status=status,
+                assigned_to_user_id=assignees[index % len(assignees)],
+                created_by_id=current_user_id,
+            )
+        )
+
+    return len(task_templates)
+
+
+def _seed_announcements(project, current_user_id):
+    if ProjectAnnouncement.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    templates = [
+        "Sprint 2 starts Monday at 9:00 AM. Please update your task status today.",
+        "API integration freeze on Friday 6:00 PM for testing and QA.",
+    ]
+    for content in templates:
+        db.session.add(
+            ProjectAnnouncement(project_id=project.id, content=content, created_by_id=current_user_id)
+        )
+    return len(templates)
+
+
+def _seed_messages(project, current_user_id):
+    if ProjectMessage.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    sender_ids = [
+        member.user_id
+        for member in TeamMember.query.filter_by(project_id=project.id).order_by(TeamMember.id.asc()).all()
+    ] or [current_user_id]
+
+    templates = [
+        "Please prioritize login error handling before adding new dashboard widgets.",
+        "Token validation fix is pushed. Please retest.",
+        "I will update the UI state for failed login responses.",
+    ]
+    for index, text in enumerate(templates):
+        db.session.add(
+            ProjectMessage(
+                project_id=project.id,
+                sender_id=sender_ids[index % len(sender_ids)],
+                message=text,
+            )
+        )
+    return len(templates)
+
+
+def _seed_files(project, current_user_id):
+    if ProjectFile.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    templates = [
+        ("api-contract-v2.pdf", "pdf", "https://example.com/files/api-contract-v2.pdf"),
+        ("sprint-2-wireframes.fig", "fig", "https://example.com/files/sprint-2-wireframes.fig"),
+    ]
+    for file_name, file_type, file_url in templates:
+        db.session.add(
+            ProjectFile(
+                project_id=project.id,
+                uploaded_by_id=current_user_id,
+                file_name=file_name,
+                file_type=file_type,
+                file_url=file_url,
+            )
+        )
+    return len(templates)
+
+
+def _seed_meetings(project, current_user_id):
+    if ProjectMeeting.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    templates = [
+        ("Daily Standup", datetime(2026, 7, 21, 9, 30), "Google Meet"),
+        ("Sprint Planning", datetime(2026, 7, 22, 14, 0), "Room B2 / Zoom"),
+    ]
+    for title, scheduled_for, location in templates:
+        db.session.add(
+            ProjectMeeting(
+                project_id=project.id,
+                title=title,
+                scheduled_for=scheduled_for,
+                location=location,
+                created_by_id=current_user_id,
+            )
+        )
+    return len(templates)
+
+
+def _seed_notifications(project, current_user_id):
+    if Notification.query.filter_by(project_id=project.id, user_id=current_user_id).first() is not None:
+        return 0
+
+    templates = [
+        (
+            "Application update",
+            "Your application shortlist was reviewed and moved to the next step.",
+            "application",
+        ),
+        (
+            "Task assigned",
+            "You were assigned to Build authentication middleware.",
+            "task",
+        ),
+        (
+            "Announcement posted",
+            "Sprint 2 starts Monday at 9:00 AM. Please update your task status today.",
+            "announcement",
+        ),
+        (
+            "Meeting scheduled",
+            "Daily Standup was scheduled for 2026-07-21T09:30:00.",
+            "meeting",
+        ),
+    ]
+
+    for index, (title, message, notif_type) in enumerate(templates):
+        db.session.add(
+            Notification(
+                user_id=current_user_id,
+                project_id=project.id,
+                title=title,
+                message=message,
+                type=notif_type,
+                is_read=index == len(templates) - 1,
+            )
+        )
+
+    return len(templates)
+
+
+def _seed_reports(project, current_user_id):
+    if ProjectReport.query.filter_by(project_id=project.id).first() is not None:
+        return 0
+
+    payload = _build_report_payload(project)
+    db.session.add(
+        ProjectReport(
+            project_id=project.id,
+            generated_by_id=current_user_id,
+            report_type="summary_pdf",
+            report_payload=payload,
+        )
+    )
+    return 1
+
+
+@collaboration_bp.post("/projects/<int:project_id>/seed-demo")
+@jwt_required()
+def seed_demo_data(project_id):
+    project, error_response = _get_project_or_404(project_id)
+    if error_response is not None:
+        return error_response
+
+    current_user_id = _current_user_id()
+    if not _can_manage_project(project, current_user_id):
+        return jsonify({"message": "Only the project owner or team leader can seed demo data"}), 403
+
+    created_counts = {
+        "team_members": _seed_team_members(project, current_user_id),
+    }
+
+    created_counts["tasks"] = _seed_tasks(project, current_user_id)
+    created_counts["announcements"] = _seed_announcements(project, current_user_id)
+    created_counts["messages"] = _seed_messages(project, current_user_id)
+    created_counts["files"] = _seed_files(project, current_user_id)
+    created_counts["meetings"] = _seed_meetings(project, current_user_id)
+    created_counts["reports"] = _seed_reports(project, current_user_id)
+    created_counts["notifications"] = _seed_notifications(project, current_user_id)
+
+    db.session.commit()
+    return (
+        jsonify(
+            {
+                "message": "Demo data loaded",
+                "created": created_counts,
+            }
+        ),
+        201,
+    )
+
+
 @collaboration_bp.post("/projects/<int:project_id>/reports")
 @jwt_required()
 def generate_report(project_id):
