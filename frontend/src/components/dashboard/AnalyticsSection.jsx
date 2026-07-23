@@ -16,7 +16,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-function AnalyticsSection({ projects = [], applications = [], isLoading = false }) {
+function AnalyticsSection({ projects = [], applications = [], applicationsOverTime = [], isLoading = false }) {
   const navigate = useNavigate()
 
   // Check if there's meaningful data
@@ -24,6 +24,7 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
     return (Array.isArray(projects) && projects.length > 0) ||
            (Array.isArray(applications) && applications.length > 0)
   }, [projects, applications])
+  
   // Applications by Status
   const applicationsByStatus = useMemo(() => {
     if (!Array.isArray(applications) || applications.length === 0) {
@@ -66,40 +67,35 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
     ].filter((item) => item.value > 0)
   }, [projects])
 
-  // Applications Over Time (last 7 days simulation)
-  const applicationsOverTime = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    const today = new Date()
+  // Applications Over Time from backend data
+  const chartData = useMemo(() => {
+    if (Array.isArray(applicationsOverTime) && applicationsOverTime.length > 0) {
+      // Transform backend data to chart format
+      // Backend returns periods as ISO dates, convert to weekday names for X-axis
+      return applicationsOverTime.map((item) => {
+        const dateObj = new Date(item.period)
+        const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' })
+        return {
+          day: dayOfWeek,
+          applications: item.count || 0,
+        }
+      })
+    }
+    return []
+  }, [applicationsOverTime])
 
-    return days.map((day, index) => {
-      const dayDate = new Date(today)
-      dayDate.setDate(dayDate.getDate() - (6 - index))
-
-      // Count applications created on or before this day
-      const count = applications.filter((app) => {
-        if (!app.created_at) return false
-        const appDate = new Date(app.created_at)
-        return appDate <= dayDate
-      }).length
-
-      return {
-        day,
-        applications: count,
-      }
-    })
-  }, [applications])
-
-  const PIE_COLORS = ['#059669', '#f59e0b', '#ef4444']
-  const BAR_COLORS = ['#059669', '#047857', '#065f46']
+  // Brand colors: Indigo/Blue for primary, status colors for semantics
+  const PIE_COLORS = ['#4F46E5', '#F59E0B', '#EF4444'] // Accepted (indigo), Pending (amber), Rejected (red)
+  const BAR_COLORS = ['#4F46E5', '#2563EB', '#6366F1'] // Brand indigo, blue, indigo-500
 
   if (isLoading) {
     return (
       <section className="space-y-6">
-        <div className="border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Analytics</h2>
+        <div className="border-b border-slate-200 pb-4">
+          <h2 className="text-xl font-semibold text-slate-900">Analytics</h2>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="h-64 animate-pulse rounded bg-gray-100" />
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="h-64 animate-pulse rounded bg-slate-100" />
         </div>
       </section>
     )
@@ -109,18 +105,18 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
   if (!hasData) {
     return (
       <section className="space-y-6">
-        <div className="border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Analytics</h2>
+        <div className="border-b border-slate-200 pb-4">
+          <h2 className="text-xl font-semibold text-slate-900">Analytics</h2>
         </div>
-        <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-12 text-center shadow-sm">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-white py-12 text-center shadow-sm">
           <div className="mb-3 text-4xl">📈</div>
-          <h3 className="mb-2 text-lg font-semibold text-gray-900">No activity yet</h3>
-          <p className="mb-6 max-w-xs text-sm text-gray-500">
-            Applications over time will appear after students start applying.
+          <h3 className="mb-2 text-lg font-semibold text-slate-900">No activity yet</h3>
+          <p className="mb-6 max-w-xs text-sm text-slate-500">
+            Application activity will appear here once students start applying to your projects.
           </p>
           <button
             onClick={() => navigate('/app/projects/create')}
-            className="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-emerald-700 transition"
+            className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 transition"
           >
             Create Project
           </button>
@@ -131,17 +127,17 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
 
   return (
     <section className="space-y-6">
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Analytics</h2>
+      <div className="border-b border-slate-200 pb-4">
+        <h2 className="text-xl font-semibold text-slate-900">Analytics</h2>
       </div>
 
       {/* Pie and Bar Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Applications by Status - Pie Chart */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold text-gray-900">Applications by Status</h3>
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-slate-900">Applications by Status</h3>
           {applicationsByStatus.length === 0 ? (
-            <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+            <div className="flex h-64 items-center justify-center text-sm text-slate-500">
               No applications data available
             </div>
           ) : (
@@ -168,10 +164,10 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
         </div>
 
         {/* Projects by Status - Bar Chart */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold text-gray-900">Projects by Status</h3>
+        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-slate-900">Projects by Status</h3>
           {projectsByStatus.length === 0 ? (
-            <div className="flex h-64 items-center justify-center text-sm text-gray-500">
+            <div className="flex h-64 items-center justify-center text-sm text-slate-500">
               No projects data available
             </div>
           ) : (
@@ -180,11 +176,11 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
                 data={projectsByStatus}
                 margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#059669" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="#4F46E5" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -192,19 +188,19 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
       </div>
 
       {/* Applications Over Time - Line Chart */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-sm font-semibold text-gray-900">Applications Over Time</h3>
-        {applicationsOverTime.every((item) => item.applications === 0) ? (
-          <div className="flex h-64 items-center justify-center text-sm text-gray-500">
-            No application history available
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="mb-4 text-sm font-semibold text-slate-900">Applications Over Time</h3>
+        {chartData.length === 0 || chartData.every((item) => item.applications === 0) ? (
+          <div className="flex h-64 items-center justify-center text-sm text-slate-500">
+            No application history available yet
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={260}>
             <LineChart
-              data={applicationsOverTime}
+              data={chartData}
               margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis dataKey="day" />
               <YAxis />
               <Tooltip />
@@ -212,8 +208,8 @@ function AnalyticsSection({ projects = [], applications = [], isLoading = false 
               <Line
                 type="monotone"
                 dataKey="applications"
-                stroke="#059669"
-                dot={{ fill: '#059669', r: 5 }}
+                stroke="#4F46E5"
+                dot={{ fill: '#4F46E5', r: 5 }}
                 activeDot={{ r: 7 }}
                 strokeWidth={2}
                 name="Total Applications"

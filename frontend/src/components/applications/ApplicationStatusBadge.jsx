@@ -9,7 +9,7 @@ const STATUS_STYLES = {
   },
   rejected: {
     label: 'Rejected',
-    className: 'border-rose-300 bg-rose-50 text-rose-800',
+    className: 'border-red-300 bg-red-50 text-red-800',
   },
 }
 

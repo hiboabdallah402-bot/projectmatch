@@ -7,7 +7,7 @@ function QuickActions() {
     {
       label: 'Create Project',
       icon: '➕',
-      color: 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700',
+      color: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700',
       onClick: () => navigate('/app/projects/create'),
     },
     {

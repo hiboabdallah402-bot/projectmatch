@@ -87,7 +87,7 @@ function LoginPage() {
       <div className="grid gap-8 rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-8 lg:grid-cols-[0.85fr_1.15fr] lg:gap-10">
         <div className="min-w-0 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-7 sm:p-9">
           <div className="relative space-y-5">
-            <p className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800">
+            <p className="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-800">
               Welcome back
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
@@ -101,7 +101,7 @@ function LoginPage() {
             <div className="space-y-3 text-sm text-slate-700">
               {['Resume your project journey', 'Keep your applications organized', 'Access protected platform features'].map((item) => (
                 <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <span className="h-2.5 w-2.5 rounded-full bg-teal-600" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-indigo-600" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -147,7 +147,7 @@ function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || isSubmitting}
-              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
             >
               {isSubmitting ? <LoadingSpinner label="Signing in..." size="sm" className="text-white" /> : 'Sign in'}
             </button>
@@ -155,7 +155,7 @@ function LoginPage() {
 
           <p className="text-sm text-slate-600">
             Need an account?{' '}
-            <Link to="/register" className="font-semibold text-cyan-700 transition hover:text-cyan-800">
+            <Link to="/register" className="font-semibold text-indigo-600 transition hover:text-indigo-700">
               Create one here
             </Link>
             .

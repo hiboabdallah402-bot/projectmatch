@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import func, and_
 from sqlalchemy.orm import joinedload
+from datetime import datetime, timedelta
 
 from extensions import db
 from models.activity import Activity
@@ -62,6 +63,39 @@ def _serialize_activity(activity):
 		"target_user": _serialize_user_min(activity.target_user),
 		"project": _serialize_project_min(activity.project),
 	}
+
+
+def _get_applications_over_time(applications):
+	"""
+	Aggregate applications by date over the last 7 days.
+	Returns a list of dicts with period (date) and count.
+	"""
+	if not applications:
+		return []
+	
+	# Get the last 7 days of data
+	today = datetime.utcnow().date()
+	date_range = [(today - timedelta(days=i)).isoformat() for i in range(6, -1, -1)]
+	
+	# Create a dict to count applications per date
+	app_counts = {}
+	for date_str in date_range:
+		app_counts[date_str] = 0
+	
+	# Count applications by applied_at date
+	for app in applications:
+		if app.applied_at:
+			app_date = app.applied_at.date().isoformat()
+			if app_date in app_counts:
+				app_counts[app_date] += 1
+	
+	# Convert to list format for chart
+	result = [
+		{"period": date_str, "count": app_counts[date_str]}
+		for date_str in date_range
+	]
+	
+	return result
 
 
 @dashboard_bp.get("/stats")
@@ -176,6 +210,7 @@ def dashboard_stats():
 			"applications_rejected": applications_rejected,
 			"application_status_distribution": application_status_dist,
 			"project_status_distribution": project_status_dist,
+			"applications_over_time": _get_applications_over_time(all_applications),
 			"recent_activities": [_serialize_activity(a) for a in recent_activities],
 			# Include full project and application details for analytics
 			"projects": [_serialize_project_full(p) for p in owned_projects],

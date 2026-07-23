@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosClient from '../../api/axiosClient'
 import { Menu, Search, Bell, LogOut, Settings, User, ChevronDown } from 'lucide-react'
+import ProjectMatchLogoMark from '../common/ProjectMatchLogoMark'
 
 function TopNavBar({ onMenuClick }) {
   const [user, setUser] = useState(null)
@@ -62,10 +63,8 @@ function TopNavBar({ onMenuClick }) {
 
           {/* Logo */}
           <div className="hidden sm:flex items-center gap-2">
-            <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-sm">
-              P
-            </div>
-            <span className="text-lg font-bold text-gray-900">ProjectMatch</span>
+            <ProjectMatchLogoMark className="h-8 w-8" />
+            <span className="text-lg font-bold text-slate-900">ProjectMatch</span>
           </div>
         </div>
 
@@ -78,7 +77,7 @@ function TopNavBar({ onMenuClick }) {
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-sm placeholder-gray-500 transition focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-200 outline-none"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm placeholder-slate-500 transition focus:border-indigo-500 focus:bg-white focus:ring-1 focus:ring-indigo-200 outline-none"
             />
           </div>
         </form>
@@ -120,7 +119,7 @@ function TopNavBar({ onMenuClick }) {
                 <div className="border-t border-gray-200 px-4 py-2 bg-gray-50">
                   <a 
                     href="/app/notifications" 
-                    className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition"
+                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition"
                   >
                     View all notifications →
                   </a>
@@ -135,7 +134,7 @@ function TopNavBar({ onMenuClick }) {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-100 transition-colors"
             >
-              <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+              <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                 {user?.full_name
                   ? user.full_name
                       .split(' ')

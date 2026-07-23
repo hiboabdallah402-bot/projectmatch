@@ -24,14 +24,14 @@ function DashboardStatCard({ title, value, note }) {
   }
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-200">
+      <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-indigo-200">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="mt-3 text-4xl font-bold text-gray-900">{value}</p>
-          <p className="mt-2 text-xs text-gray-500">{note}</p>
+          <p className="text-sm font-medium text-slate-600">{title}</p>
+          <p className="mt-3 text-4xl font-bold text-slate-900">{value}</p>
+          <p className="mt-2 text-xs text-slate-500">{note}</p>
         </div>
-        <div className="rounded-lg bg-emerald-100 p-3 text-emerald-600 flex-shrink-0">
+        <div className="rounded-lg bg-indigo-100 p-3 text-indigo-600 flex-shrink-0">
           {getIcon()}
         </div>
       </div>

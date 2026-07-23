@@ -59,8 +59,8 @@ function NotificationsWidget({ isLoading = false }) {
           {notifications.slice(0, 4).map((notification) => (
             <div
               key={notification.id}
-              className={`flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${
-                !notification.read ? 'bg-emerald-50' : ''
+              className={`flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors ${
+                !notification.read ? 'bg-indigo-50' : ''
               }`}
             >
               <span className="text-lg flex-shrink-0">{notification.icon}</span>

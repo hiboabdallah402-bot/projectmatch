@@ -66,10 +66,10 @@ function RecentActivitySection({ activities }) {
           </div>
           <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
             hasActivities
-              ? 'bg-emerald-100 text-emerald-700'
-              : 'bg-gray-100 text-gray-700'
+              ? 'bg-indigo-100 text-indigo-700'
+              : 'bg-slate-100 text-slate-700'
           }`}>
-            <span className={`h-2 w-2 rounded-full ${hasActivities ? 'bg-emerald-600' : 'bg-gray-400'}`}></span>
+            <span className={`h-2 w-2 rounded-full ${hasActivities ? 'bg-indigo-600' : 'bg-slate-400'}`}></span>
             {hasActivities ? 'Active' : 'Quiet'}
           </span>
         </div>
@@ -82,7 +82,7 @@ function RecentActivitySection({ activities }) {
               key={activity.id}
               className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 transition hover:bg-gray-50"
             >
-              <div className="flex-shrink-0 rounded-lg bg-emerald-100 p-2.5 text-emerald-600">
+              <div className="flex-shrink-0 rounded-lg bg-indigo-100 p-2.5 text-indigo-600">
                 {getActivityIcon(activity.title)}
               </div>
               <div className="flex-1 min-w-0">

@@ -6,11 +6,25 @@ import { getAccessToken } from '../utils/auth'
 function ProtectedLayout() {
   const location = useLocation()
   const token = getAccessToken()
+  const isWorkspace = location.pathname.startsWith('/app')
 
   if (!token) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
+  // For workspace routes (/app/*), render full-height layout without container
+  if (isWorkspace) {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+        <Navbar />
+        <div className="flex-1 overflow-hidden">
+          <Outlet />
+        </div>
+      </div>
+    )
+  }
+
+  // For other protected routes, render with rounded container
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <Navbar />

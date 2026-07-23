@@ -14,6 +14,7 @@ import LoginPage from '../pages/LoginPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import NotificationsPage from '../pages/NotificationsPage'
 import ProjectDetailsPage from '../pages/ProjectDetailsPage'
+import ProjectOverviewPage from '../pages/ProjectOverviewPage'
 import ProfilePage from '../pages/ProfilePage'
 import ProjectsPage from '../pages/ProjectsPage'
 import RegisterPage from '../pages/RegisterPage'
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: 'about',
         element: <AboutPage />,
+      },
+      {
+        path: 'projects/:id',
+        element: <ProjectOverviewPage />,
       },
       {
         path: 'setup-status',

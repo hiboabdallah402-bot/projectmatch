@@ -10,7 +10,7 @@ function UserProfileSummaryCard({ user, isLoading, errorMessage }) {
     : 'Unavailable'
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-200 sm:p-7">
+    <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-indigo-200 sm:p-7">
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">Profile Summary</p>
 
       {isLoading ? (

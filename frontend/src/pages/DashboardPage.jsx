@@ -18,6 +18,7 @@ function DashboardPage() {
   const [activities, setActivities] = useState([])
   const [projects, setProjects] = useState([])
   const [applications, setApplications] = useState([])
+  const [applicationsOverTime, setApplicationsOverTime] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -62,6 +63,7 @@ function DashboardPage() {
         setActivities(dashboardStats.recent_activities || [])
         setProjects(dashboardStats.projects || [])
         setApplications(dashboardStats.applications || [])
+        setApplicationsOverTime(dashboardStats.applications_over_time || [])
       } catch (error) {
         const message = error?.response?.data?.message || 'Unable to load your profile details right now.'
         setErrorMessage(message)
@@ -107,7 +109,12 @@ function DashboardPage() {
       </section>
 
       {/* Analytics */}
-      <AnalyticsSection projects={projects} applications={applications} isLoading={isLoading} />
+      <AnalyticsSection 
+        projects={projects} 
+        applications={applications}
+        applicationsOverTime={applicationsOverTime}
+        isLoading={isLoading} 
+      />
 
       {/* Quick Actions + Upcoming Deadlines */}
       <section className="grid gap-6 lg:grid-cols-2">

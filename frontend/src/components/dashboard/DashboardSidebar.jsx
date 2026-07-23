@@ -11,6 +11,7 @@ import {
   BarChart3,
   LogOut,
 } from 'lucide-react'
+import ProjectMatchLogoMark from '../common/ProjectMatchLogoMark'
 
 const navigationItems = [
   {
@@ -105,13 +106,11 @@ function DashboardSidebar({ isOpen, onClose }) {
       >
         <div className="flex h-full flex-col overflow-y-auto px-3 py-4">
           {/* Logo Section */}
-          <div className="mb-6 flex items-center gap-2 border-b border-gray-200 pb-4">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold">
-              P
-            </div>
+          <div className="mb-6 flex items-center gap-2 border-b border-slate-200 pb-4">
+            <ProjectMatchLogoMark className="h-10 w-10" />
             <div>
-              <h2 className="text-base font-bold text-gray-900">ProjectMatch</h2>
-              <p className="text-xs text-gray-500">Workspace</p>
+              <h2 className="text-base font-bold text-slate-900">ProjectMatch</h2>
+              <p className="text-xs text-slate-500">Workspace</p>
             </div>
           </div>
 
@@ -127,8 +126,8 @@ function DashboardSidebar({ isOpen, onClose }) {
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-emerald-50 text-emerald-700 font-semibold border-l-2 border-emerald-600'
-                          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+                          ? 'bg-indigo-50 text-indigo-700 font-semibold border-l-2 border-indigo-600'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
                       }`
                     }
                     onClick={onClose}
@@ -142,10 +141,10 @@ function DashboardSidebar({ isOpen, onClose }) {
           </ul>
 
           {/* Footer Tip */}
-          <div className="mt-auto border-t border-gray-200 pt-4">
-            <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3">
-              <p className="text-xs font-semibold text-emerald-900">💡 Tip</p>
-              <p className="mt-1 text-xs text-emerald-800">Use collaboration features to manage your team effectively.</p>
+          <div className="mt-auto border-t border-slate-200 pt-4">
+            <div className="rounded-lg bg-indigo-50 border border-indigo-200 p-3">
+              <p className="text-xs font-semibold text-indigo-900">💡 Tip</p>
+              <p className="mt-1 text-xs text-indigo-800">Use collaboration features to manage your team effectively.</p>
             </div>
           </div>
         </div>

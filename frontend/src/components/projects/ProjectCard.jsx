@@ -12,7 +12,7 @@ function ProjectCard({ project, canManage = false, onDelete, isDeleting = false,
     project.status === 'open'
       ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
       : project.status === 'in_progress'
-        ? 'border-cyan-300 bg-cyan-50 text-cyan-700'
+        ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
         : project.status === 'completed'
           ? 'border-slate-300 bg-slate-100 text-slate-700'
           : 'border-amber-300 bg-amber-50 text-amber-700'
@@ -36,7 +36,7 @@ function ProjectCard({ project, canManage = false, onDelete, isDeleting = false,
 
   return (
     <article
-      className="flex h-full cursor-pointer flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 focus-visible:border-cyan-400 focus-visible:ring-4 focus-visible:ring-cyan-100"
+      className="flex h-full cursor-pointer flex-col rounded-[1.75rem] border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 focus-visible:border-indigo-400 focus-visible:ring-4 focus-visible:ring-indigo-100"
       role="button"
       tabIndex={0}
       onClick={handleCardOpen}

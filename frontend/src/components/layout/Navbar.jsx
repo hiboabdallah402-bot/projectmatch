@@ -77,12 +77,12 @@ function Navbar() {
     [
       'rounded-full px-4 py-2 text-sm font-medium transition-colors',
       isActive
-        ? 'bg-white text-slate-950 shadow-sm'
-        : 'text-zinc-300 hover:bg-white/10 hover:text-white',
+        ? 'bg-indigo-600 text-white shadow-sm'
+        : 'text-slate-300 hover:bg-indigo-500/10 hover:text-slate-100',
     ].join(' ')
 
   return (
-    <header className="sticky top-0 z-30 overflow-x-hidden border-b border-white/10 bg-[#07090d]/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full overflow-x-hidden border-b border-slate-700/50 bg-slate-950 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="inline-flex min-w-0 items-center gap-2" onClick={closeMenu}>
           <ProjectMatchLogoMark className="h-10 w-10 shrink-0 shadow-[0_12px_30px_rgba(15,118,110,0.18)]" />
@@ -94,7 +94,7 @@ function Navbar() {
 
         <button
           type="button"
-          className="inline-flex rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-100 sm:hidden"
+          className="inline-flex rounded-xl border border-slate-700 bg-slate-900/50 p-2 text-slate-300 hover:bg-slate-800 sm:hidden"
           aria-expanded={isMenuOpen}
           aria-controls="mobile-nav"
           aria-label="Toggle main navigation"
@@ -121,7 +121,7 @@ function Navbar() {
               </NavLink>
               <Link
                 to="/app/notifications"
-                className="relative rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+                className="relative rounded-full border border-slate-700 bg-slate-900/50 px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
               >
                 Notifications
                 {unreadNotifications > 0 ? (
@@ -140,7 +140,7 @@ function Navbar() {
               ) : null}
               <button
                 type="button"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+                className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
                 onClick={handleLogout}
               >
                 Logout
@@ -153,7 +153,7 @@ function Navbar() {
               </NavLink>
               <Link
                 to="/register"
-                className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-zinc-100"
+                className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
               >
                 Register
               </Link>
@@ -163,7 +163,7 @@ function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <nav id="mobile-nav" className="border-t border-white/10 bg-[#0b0d12] px-4 py-3 sm:hidden" aria-label="Mobile navigation">
+        <nav id="mobile-nav" className="border-t border-slate-700/50 bg-slate-900 px-4 py-3 sm:hidden" aria-label="Mobile navigation">
           <div className="flex flex-col gap-2">
             {publicNavItems.map((item) => (
               <NavLink
@@ -197,7 +197,7 @@ function Navbar() {
                 ) : null}
                 <button
                   type="button"
-                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-left text-sm font-medium text-zinc-200 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+                  className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-left text-sm font-medium text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
                   onClick={handleLogout}
                 >
                   Logout
