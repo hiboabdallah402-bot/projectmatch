@@ -115,6 +115,11 @@ export async function generateReport(projectId) {
   return unwrapResponse(response, 'report', null)
 }
 
+export async function createReport(projectId, payload) {
+  const response = await axiosClient.post(`${collaborationBase}/projects/${projectId}/reports`, payload)
+  return unwrapResponse(response, 'report', null)
+}
+
 export async function listReports(projectId) {
   const response = await axiosClient.get(`${collaborationBase}/projects/${projectId}/reports`)
   return unwrapResponse(response, 'reports', [])

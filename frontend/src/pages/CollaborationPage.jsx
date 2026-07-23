@@ -5,6 +5,7 @@ import { dispatchNotificationsChangeEvent } from '../utils/auth'
 import {
   addTeamMember,
   createMeeting,
+  createReport,
   createTask,
   deleteTask,
   generateReport,
@@ -118,6 +119,9 @@ function CollaborationPage() {
   const [meetingTitle, setMeetingTitle] = useState('')
   const [meetingDateTime, setMeetingDateTime] = useState('')
   const [meetingLocation, setMeetingLocation] = useState('')
+
+  const [reportType, setReportType] = useState('Weekly Progress')
+  const [reportContent, setReportContent] = useState('')
 
   const selectedProject = useMemo(
     () => projects.find((project) => String(project.id) === String(selectedProjectId)),
@@ -477,6 +481,30 @@ function CollaborationPage() {
     }
   }
 
+  const handleCreateCustomReport = async () => {
+    if (!reportContent.trim()) {
+      setErrorMessage('Please enter report content.')
+      return
+    }
+
+    clearMessages()
+    try {
+      await createReport(selectedProjectId, {
+        report_type: reportType,
+        report_payload: {
+          content: reportContent,
+          created_date: new Date().toLocaleDateString(),
+        },
+      })
+      setReports(await listReports(selectedProjectId))
+      setReportType('Weekly Progress')
+      setReportContent('')
+      showSuccess('Report created successfully.')
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.message || 'Unable to create report.')
+    }
+  }
+
   const handleLoadDemoData = async () => {
     if (!selectedProjectId || isSeedingDemo) {
       return
@@ -572,24 +600,7 @@ function CollaborationPage() {
         ))}
       </nav>
 
-      {selectedProject && !isLoadingTab && activeTabCount === 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-4">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-cyan-900">{activeTabLabel} is empty</p>
-            <p className="text-sm text-cyan-800">
-              Add your own records manually, or load demo content once to populate this project with realistic sample data.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleLoadDemoData}
-            disabled={!selectedProjectId || isSeedingDemo}
-            className="rounded-xl border border-cyan-300 bg-white px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:border-cyan-400 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSeedingDemo ? 'Loading demo data...' : 'Load Demo Data'}
-          </button>
-        </div>
-      ) : null}
+
 
       {!selectedProject && !isLoadingProjects ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
@@ -780,9 +791,8 @@ function CollaborationPage() {
         <div className="space-y-4">
           <div className="max-h-80 space-y-2 overflow-auto rounded-2xl border border-slate-200 bg-white p-4">
             {messages.length === 0 ? (
-              <div className="space-y-3">
-                <p className="text-sm text-slate-600">No discussion messages yet. Start the conversation below.</p>
-                <ExampleCard title="Suggested discussion starters" items={examples.chat} />
+              <div className="flex h-48 items-center justify-center">
+                <p className="text-sm text-slate-500">No discussion messages yet. Start the conversation below.</p>
               </div>
             ) : (
               messages.map((item) => (
@@ -849,19 +859,77 @@ function CollaborationPage() {
           </div>
         ) : (
         <div className="space-y-4">
-          <button type="button" onClick={handleGenerateReport} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Generate report</button>
-          {reports.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-900 mb-3">Create New Report</p>
             <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No reports have been generated yet.</div>
-              <ExampleCard title="Suggested report summaries" items={examples.reports} />
+              <select 
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="Weekly Progress">Weekly Progress</option>
+                <option value="Sprint Health">Sprint Health</option>
+                <option value="Technical Update">Technical Update</option>
+                <option value="Risk Assessment">Risk Assessment</option>
+                <option value="Architecture Review">Architecture Review</option>
+                <option value="Custom">Custom</option>
+              </select>
+              <textarea
+                value={reportContent}
+                onChange={(e) => setReportContent(e.target.value)}
+                placeholder="Enter report content..."
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none resize-none"
+                rows="4"
+              />
+              <div className="flex gap-2">
+                <button 
+                  type="button" 
+                  onClick={handleCreateCustomReport}
+                  className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700"
+                >
+                  Create Report
+                </button>
+                <button 
+                  type="button" 
+                  onClick={handleGenerateReport}
+                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                >
+                  Generate Auto Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {reports.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-600">
+              <p>No reports have been generated yet. Click "Create Report" to create one.</p>
             </div>
           ) : (
             <div className="grid gap-3">
               {reports.map((item) => (
                 <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm font-semibold text-slate-900">Report #{item.id}</p>
-                  <p className="text-xs text-slate-500">{formatDateTime(item.created_at)}</p>
-                  <pre className="mt-2 max-h-56 overflow-auto rounded-xl bg-slate-50 p-3 text-xs text-slate-700">{JSON.stringify(item.report_payload, null, 2)}</pre>
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{item.report_type}</p>
+                        <p className="text-xs text-slate-500">{formatDateTime(item.created_at)}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2 rounded-xl bg-slate-50 p-3">
+                      {typeof item.report_payload === 'object' && item.report_payload ? (
+                        Object.entries(item.report_payload).map(([key, value]) => (
+                          <div key={key} className="border-b border-slate-200 pb-2 last:border-b-0">
+                            <p className="text-xs font-semibold uppercase text-slate-600">{key.replace(/_/g, ' ')}</p>
+                            <p className="text-sm text-slate-800">
+                              {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-700">{String(item.report_payload)}</p>
+                      )}
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>

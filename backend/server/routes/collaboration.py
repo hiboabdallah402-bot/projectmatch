@@ -1092,11 +1092,21 @@ def generate_report(project_id):
     if not _can_manage_project(project, current_user_id) and not db.session.get(User, current_user_id).is_supervisor:
         return jsonify({"message": "Only project managers or supervisors can generate reports"}), 403
 
-    payload = _build_report_payload(project)
+    data = request.get_json() or {}
+    
+    # Use provided report_type or default to custom
+    report_type = data.get('report_type', 'Custom Report')
+    
+    # If report_payload provided, use it; otherwise generate from project
+    if 'report_payload' in data:
+        payload = data.get('report_payload', {})
+    else:
+        payload = _build_report_payload(project)
+    
     report = ProjectReport(
         project_id=project.id,
         generated_by_id=current_user_id,
-        report_type="summary_pdf",
+        report_type=report_type,
         report_payload=payload,
     )
     db.session.add(report)
