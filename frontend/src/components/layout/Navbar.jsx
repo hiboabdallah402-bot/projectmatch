@@ -82,7 +82,7 @@ function Navbar() {
     ].join(' ')
 
   return (
-    <header className="sticky top-0 z-50 w-full overflow-x-hidden border-b border-slate-700/50 bg-slate-950 backdrop-blur-xl shadow-lg shadow-black/10">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-700/50 bg-slate-950 backdrop-blur-xl shadow-lg shadow-black/10">
       <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="inline-flex min-w-0 items-center gap-2" onClick={closeMenu}>
           <ProjectMatchLogoMark className="h-10 w-10 shrink-0 shadow-[0_12px_30px_rgba(15,118,110,0.18)]" />

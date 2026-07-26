@@ -208,15 +208,27 @@ function NotificationsPage() {
 
   const handleMarkRead = async (notificationId) => {
     try {
+      // Update local state immediately for instant UI response
+      const updatedNotification = notifications.find((n) => n.id === notificationId)
+      if (updatedNotification) {
+        setNotifications((previous) =>
+          previous.map((item) => (item.id === notificationId ? { ...item, is_read: true } : item)),
+        )
+        // Update stats immediately
+        setStats((previous) => ({
+          ...previous,
+          unread: Math.max(0, previous.unread - 1),
+          read_today: previous.read_today + 1,
+        }))
+      }
+      
+      // Then sync with server
       await markNotificationRead(notificationId)
-      setNotifications((previous) =>
-        previous.map((item) => (item.id === notificationId ? { ...item, is_read: true } : item)),
-      )
-      // Refresh stats after marking read
-      await loadData({ background: true })
       dispatchNotificationsChangeEvent()
     } catch (error) {
       setErrorMessage(error?.response?.data?.message || 'Unable to mark notification as read.')
+      // Reload data if there was an error to sync state
+      await loadData({ background: true })
     }
   }
 

@@ -101,7 +101,7 @@ function DashboardSidebar({ isOpen, onClose }) {
       <aside
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-72 transform border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out sm:static sm:top-0 sm:h-auto sm:translate-x-0 sm:transform-none shrink-0`}
+        } fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-72 transform border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out sm:static sm:top-0 sm:h-full sm:translate-x-0 sm:transform-none shrink-0`}
         aria-label="Sidebar"
       >
         <div className="flex h-full flex-col overflow-y-auto px-3 py-4">

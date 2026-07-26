@@ -15,9 +15,9 @@ function ProtectedLayout() {
   // For workspace routes (/app/*), render full-height layout without container
   if (isWorkspace) {
     return (
-      <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+      <div className="h-screen bg-white text-slate-900 flex flex-col overflow-hidden">
         <Navbar />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 flex overflow-hidden">
           <Outlet />
         </div>
       </div>

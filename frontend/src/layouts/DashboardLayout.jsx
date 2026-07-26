@@ -7,12 +7,12 @@ function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex w-full h-full">
       {/* Sidebar */}
       <DashboardSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-white">
+      <main className="flex-1 overflow-y-auto bg-white">
         <div className="flex flex-col h-full">
           {/* Mobile menu button */}
           <div className="sm:hidden border-b border-slate-200 px-4 py-3">

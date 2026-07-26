@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import axiosClient from '../api/axiosClient'
 import { dispatchNotificationsChangeEvent } from '../utils/auth'
 import {
+  addFileMetadata,
   addTeamMember,
   createMeeting,
   createReport,
@@ -11,6 +12,7 @@ import {
   generateReport,
   getProjectProgress,
   listAnnouncements,
+  listFiles,
   listMeetings,
   listMessages,
   listReports,
@@ -31,6 +33,7 @@ const tabs = [
   { key: 'chat', label: 'Discussion' },
   { key: 'meetings', label: 'Meetings' },
   { key: 'reports', label: 'Reports' },
+  { key: 'files', label: 'Files' },
 ]
 
 const roleOptions = ['Frontend Developer', 'Backend Developer', 'Designer', 'Tester', 'Project Manager', 'Contributor']
@@ -98,6 +101,7 @@ function CollaborationPage() {
   const [messages, setMessages] = useState([])
   const [meetings, setMeetings] = useState([])
   const [reports, setReports] = useState([])
+  const [files, setFiles] = useState([])
   const [progress, setProgress] = useState(null)
 
   const [errorMessage, setErrorMessage] = useState('')
@@ -122,6 +126,10 @@ function CollaborationPage() {
 
   const [reportType, setReportType] = useState('Weekly Progress')
   const [reportContent, setReportContent] = useState('')
+
+  const [fileName, setFileName] = useState('')
+  const [fileUrl, setFileUrl] = useState('')
+  const [fileType, setFileType] = useState('')
 
   const selectedProject = useMemo(
     () => projects.find((project) => String(project.id) === String(selectedProjectId)),
@@ -169,8 +177,9 @@ function CollaborationPage() {
     if (activeTab === 'chat') return messages.length
     if (activeTab === 'meetings') return meetings.length
     if (activeTab === 'reports') return reports.length
+    if (activeTab === 'files') return files.length
     return 0
-  }, [activeTab, announcements.length, meetings.length, messages.length, reports.length, tasks.length, teamMembers.length])
+  }, [activeTab, announcements.length, files.length, meetings.length, messages.length, reports.length, tasks.length, teamMembers.length])
 
   const activeTabLabel = useMemo(() => tabs.find((tab) => tab.key === activeTab)?.label || 'Workspace', [activeTab])
 
@@ -186,30 +195,41 @@ function CollaborationPage() {
           axiosClient.get('/api/applications?scope=submitted'),
         ])
 
-        const currentUserId = meResponse.data?.user?.id
+        const currentUser = meResponse.data?.user
+        const currentUserId = currentUser?.id
+        const isSupervisor = currentUser?.is_supervisor
         const allProjects = Array.isArray(projectsResponse.data?.projects) ? projectsResponse.data.projects : []
         const submittedApplications = Array.isArray(submittedResponse.data?.applications)
           ? submittedResponse.data.applications
           : []
 
-        const ownedProjects = allProjects.filter((project) => Number(project.owner_id) === Number(currentUserId))
-        const acceptedJoinedProjects = submittedApplications
-          .filter((application) => application.status === 'Accepted' && application.project)
-          .map((application) => ({
-            id: application.project.id,
-            title: application.project.title,
-            owner_id: application.project.owner_id,
-            status: application.project.status,
-          }))
+        let projectOptions = []
 
-        const projectMap = new Map()
-        ;[...ownedProjects, ...acceptedJoinedProjects].forEach((project) => {
-          if (!projectMap.has(project.id)) {
-            projectMap.set(project.id, project)
-          }
-        })
+        if (isSupervisor) {
+          // Supervisors see ALL active/open projects
+          projectOptions = allProjects.filter((project) => project.status === 'open' || project.status === 'in_progress')
+        } else {
+          // Normal users see only their owned projects and accepted joined projects
+          const ownedProjects = allProjects.filter((project) => Number(project.owner_id) === Number(currentUserId))
+          const acceptedJoinedProjects = submittedApplications
+            .filter((application) => application.status === 'Accepted' && application.project)
+            .map((application) => ({
+              id: application.project.id,
+              title: application.project.title,
+              owner_id: application.project.owner_id,
+              status: application.project.status,
+            }))
 
-        const projectOptions = Array.from(projectMap.values())
+          const projectMap = new Map()
+          ;[...ownedProjects, ...acceptedJoinedProjects].forEach((project) => {
+            if (!projectMap.has(project.id)) {
+              projectMap.set(project.id, project)
+            }
+          })
+
+          projectOptions = Array.from(projectMap.values())
+        }
+
         setProjects(projectOptions)
 
         const queryProject = searchParams.get('projectId')
@@ -292,6 +312,11 @@ function CollaborationPage() {
       if (activeTab === 'reports') {
         const data = await listReports(selectedProjectId)
         setReports(data)
+      }
+
+      if (activeTab === 'files') {
+        const data = await listFiles(selectedProjectId)
+        setFiles(data)
       }
     } catch (error) {
       const message = error?.response?.data?.message || 'Unable to load tab data.'
@@ -502,6 +527,29 @@ function CollaborationPage() {
       showSuccess('Report created successfully.')
     } catch (error) {
       setErrorMessage(error?.response?.data?.message || 'Unable to create report.')
+    }
+  }
+
+  const handleUploadFile = async () => {
+    if (!fileName.trim() || !fileUrl.trim() || !fileType.trim()) {
+      setErrorMessage('Please enter file name, URL, and type.')
+      return
+    }
+
+    clearMessages()
+    try {
+      await addFileMetadata(selectedProjectId, {
+        file_name: fileName,
+        file_url: fileUrl,
+        file_type: fileType,
+      })
+      setFiles(await listFiles(selectedProjectId))
+      setFileName('')
+      setFileUrl('')
+      setFileType('')
+      showSuccess('File uploaded successfully.')
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.message || 'Unable to upload file.')
     }
   }
 
@@ -928,6 +976,79 @@ function CollaborationPage() {
                       ) : (
                         <p className="text-sm text-slate-700">{String(item.report_payload)}</p>
                       )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+        )
+      ) : null}
+
+      {selectedProject && activeTab === 'files' ? (
+        isLoadingTab ? (
+          <div className="space-y-4">
+            <div className="h-10 w-40 animate-pulse rounded-xl bg-slate-100" />
+            <TabSkeleton lines={3} />
+          </div>
+        ) : (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-900 mb-3">Upload New File</p>
+            <div className="space-y-3">
+              <input 
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder="File name (e.g., api-contract.pdf)"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
+              />
+              <input 
+                value={fileType}
+                onChange={(e) => setFileType(e.target.value)}
+                placeholder="File type (e.g., pdf, xlsx, docx, png)"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
+              />
+              <input 
+                value={fileUrl}
+                onChange={(e) => setFileUrl(e.target.value)}
+                placeholder="File URL (e.g., https://example.com/files/document.pdf)"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-cyan-500 focus:outline-none"
+              />
+              <button 
+                type="button" 
+                onClick={handleUploadFile}
+                className="w-full rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700"
+              >
+                Upload File
+              </button>
+            </div>
+          </div>
+
+          {files.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-600">
+              <p>No files have been uploaded yet.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {files.map((item) => (
+                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-md transition">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <a 
+                        href={item.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-cyan-600 hover:text-cyan-700 break-words"
+                      >
+                        📄 {item.file_name}
+                      </a>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-500">
+                          <span className="inline-block bg-slate-100 px-2 py-1 rounded">{item.file_type?.toUpperCase() || 'FILE'}</span>
+                        </p>
+                        <p className="text-xs text-slate-600">Uploaded {formatDateTime(item.uploaded_at)}</p>
+                      </div>
                     </div>
                   </div>
                 </article>

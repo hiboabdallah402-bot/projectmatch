@@ -3,19 +3,12 @@ import WelcomeCard from '../components/dashboard/WelcomeCard'
 import UserProfileSummaryCard from '../components/dashboard/UserProfileSummaryCard'
 import DashboardStatsSection from '../components/dashboard/DashboardStatsSection'
 import AnalyticsSection from '../components/dashboard/AnalyticsSection'
-import QuickActions from '../components/dashboard/QuickActions'
-import UpcomingDeadlines from '../components/dashboard/UpcomingDeadlines'
-import ProjectProgress from '../components/dashboard/ProjectProgress'
-import NotificationsWidget from '../components/dashboard/NotificationsWidget'
-import CollaborationPreview from '../components/dashboard/CollaborationPreview'
-import RecentActivitySection from '../components/dashboard/RecentActivitySection'
 import axiosClient from '../api/axiosClient'
 
 function DashboardPage() {
   const [user, setUser] = useState(null)
   const [userName, setUserName] = useState('')
   const [stats, setStats] = useState([])
-  const [activities, setActivities] = useState([])
   const [projects, setProjects] = useState([])
   const [applications, setApplications] = useState([])
   const [applicationsOverTime, setApplicationsOverTime] = useState([])
@@ -60,7 +53,6 @@ function DashboardPage() {
         setUser(currentUser)
         setUserName(currentUser?.full_name || '')
         setStats(nextStats)
-        setActivities(dashboardStats.recent_activities || [])
         setProjects(dashboardStats.projects || [])
         setApplications(dashboardStats.applications || [])
         setApplicationsOverTime(dashboardStats.applications_over_time || [])
@@ -84,7 +76,7 @@ function DashboardPage() {
             note: 'Unavailable right now.',
           },
         ])
-        setActivities([])
+        // Activities are no longer displayed
       } finally {
         setIsLoading(false)
       }
@@ -115,24 +107,6 @@ function DashboardPage() {
         applicationsOverTime={applicationsOverTime}
         isLoading={isLoading} 
       />
-
-      {/* Quick Actions + Upcoming Deadlines */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        <QuickActions />
-        <UpcomingDeadlines projects={projects} isLoading={isLoading} />
-      </section>
-
-      {/* Project Progress + Notifications */}
-      <section className="grid gap-6 lg:grid-cols-2">
-        <ProjectProgress projects={projects} isLoading={isLoading} />
-        <NotificationsWidget isLoading={isLoading} />
-      </section>
-
-      {/* Collaboration Preview */}
-      <CollaborationPreview projects={projects} isLoading={isLoading} />
-
-      {/* Recent Activity */}
-      <RecentActivitySection activities={activities} />
     </div>
   )
 }

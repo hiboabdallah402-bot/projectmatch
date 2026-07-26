@@ -66,7 +66,7 @@ def get_notification_stats():
 		.filter(
 			Notification.user_id == current_user_id,
 			Notification.is_read == True,
-			Notification.created_at >= today_start,
+			Notification.read_at >= today_start,
 		)
 		.scalar()
 		or 0
@@ -107,6 +107,7 @@ def mark_notification_read(notification_id):
 		return jsonify({"message": "You are not allowed to update this notification"}), 403
 
 	notification.is_read = True
+	notification.read_at = datetime.utcnow()
 	db.session.commit()
 
 	return jsonify(
@@ -122,7 +123,7 @@ def mark_all_notifications_read():
 
 	# Update all unread notifications
 	db.session.query(Notification).filter_by(user_id=current_user_id, is_read=False).update(
-		{"is_read": True}
+		{"is_read": True, "read_at": datetime.utcnow()}
 	)
 	db.session.commit()
 

@@ -71,30 +71,6 @@ const benefits = [
   },
 ]
 
-const testimonials = [
-  {
-    name: 'Emma Thompson',
-    role: 'Computer Science Student',
-    quote: 'ProjectMatch made finding my final year project team so much easier. The recommendations were incredibly accurate!',
-    rating: 5,
-    avatar: 'ET'
-  },
-  {
-    name: 'Dr. James Wilson',
-    role: 'Senior Academic Supervisor',
-    quote: 'I can now oversee multiple student projects efficiently. The progress tracking system is game-changing.',
-    rating: 5,
-    avatar: 'JW'
-  },
-  {
-    name: 'Maria Garcia',
-    role: 'Project Team Lead',
-    quote: 'Managing our team\'s tasks and deadlines has never been smoother. Exactly what we needed.',
-    rating: 5,
-    avatar: 'MG'
-  },
-]
-
 function HomePage() {
   const navigate = useNavigate()
 
@@ -266,42 +242,6 @@ function HomePage() {
                 </div>
               )
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="px-6 py-12 sm:px-10 lg:px-14">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              What our users are saying
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <div 
-                key={testimonial.name}
-                className="rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md border border-slate-200 hover:border-indigo-200"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900">{testimonial.name}</p>
-                    <p className="text-xs text-slate-500">{testimonial.role}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-0.5">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm text-slate-600 leading-relaxed">"{testimonial.quote}"</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

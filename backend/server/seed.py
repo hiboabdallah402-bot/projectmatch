@@ -7,7 +7,9 @@ from extensions import db
 from models.user import User
 from models.project import Project
 from models.application import Application
+from models.collaboration import TeamMember, Notification
 from werkzeug.security import generate_password_hash
+from services import create_notification
 
 def seed_database():
     """Populate database with test users and projects"""
@@ -32,7 +34,7 @@ def seed_database():
                 'full_name': 'Ahmed Hassan',
                 'email': 'ahmedhassan23@email.com',
                 'password': 'password123',
-                'is_supervisor': True,
+                'is_supervisor': False,
             },
             {
                 'full_name': 'Fatima Omar',
@@ -44,7 +46,7 @@ def seed_database():
                 'full_name': 'Mohammed Saeed',
                 'email': 'mohammed.saeed88@email.com',
                 'password': 'password123',
-                'is_supervisor': True,
+                'is_supervisor': False,
             },
             {
                 'full_name': 'Zainab Ali',
@@ -62,13 +64,13 @@ def seed_database():
                 'full_name': 'Leila Mansour',
                 'email': 'leila.mansour@email.com',
                 'password': 'password123',
-                'is_supervisor': True,
+                'is_supervisor': False,
             },
             {
                 'full_name': 'Tariq Al-Rashid',
                 'email': 'tariq.rashid@email.com',
                 'password': 'password123',
-                'is_supervisor': True,
+                'is_supervisor': False,
             },
             {
                 'full_name': 'Amira Hassan',
@@ -225,6 +227,45 @@ def seed_database():
         
         db.session.commit()
         print(f"  ✓ Created sample applications")
+        
+        # Create notifications for all applications (simulating automatic behavior)
+        for app in apps:
+            project = db.session.get(Project, app.project_id)
+            user = db.session.get(User, app.user_id)
+            if project and user:
+                notification_type = "application_submitted" if app.status == "Pending" else "application_accepted"
+                message = (
+                    f"New application from {user.full_name}" 
+                    if app.status == "Pending" 
+                    else f"{user.full_name} was accepted to your project"
+                )
+                create_notification(
+                    user_id=project.owner_id,
+                    notification_type=notification_type,
+                    title=message,
+                    message=f"Project: {project.title}",
+                    priority="high" if app.status == "Pending" else "normal",
+                    project_id=project.id,
+                    application_id=app.id,
+                )
+        
+        db.session.commit()
+        print(f"  ✓ Created notifications for applications")
+        
+        # Add accepted applicants as team members
+        accepted_apps = [app for app in apps if app.status == 'Accepted']
+        for app in accepted_apps:
+            team_member = TeamMember(
+                project_id=app.project_id,
+                user_id=app.user_id,
+                added_by_id=None,  # Auto-added from application acceptance
+                role='Contributor',
+                is_leader=False,
+            )
+            db.session.add(team_member)
+        
+        db.session.commit()
+        print(f"  ✓ Added {len(accepted_apps)} accepted applicants as team members")
         
         print("\n✅ Database seeded successfully!")
         print("\n📝 Test Account Credentials:")

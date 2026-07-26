@@ -202,6 +202,7 @@ class Notification(db.Model):
 	message = db.Column(db.Text, nullable=False)
 	priority = db.Column(db.String(20), nullable=False, default="normal")  # normal, high, urgent
 	is_read = db.Column(db.Boolean, nullable=False, default=False)
+	read_at = db.Column(db.DateTime, nullable=True)  # timestamp when marked as read
 	created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 	user = db.relationship("User", back_populates="notifications")
