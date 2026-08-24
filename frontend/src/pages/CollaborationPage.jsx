@@ -123,6 +123,8 @@ function CollaborationPage() {
   const [meetingTitle, setMeetingTitle] = useState('')
   const [meetingDateTime, setMeetingDateTime] = useState('')
   const [meetingLocation, setMeetingLocation] = useState('')
+  const [meetingDescription, setMeetingDescription] = useState('')
+  const [editingMeetingId, setEditingMeetingId] = useState(null)
 
   const [reportType, setReportType] = useState('Weekly Progress')
   const [reportContent, setReportContent] = useState('')
@@ -203,6 +205,9 @@ function CollaborationPage() {
           ? submittedResponse.data.applications
           : []
 
+        // Get user's owned projects (for everyone - supervisors and regular users)
+        const ownedProjects = allProjects.filter((project) => Number(project.owner_id) === Number(currentUserId))
+
         let projectOptions = []
 
         if (isSupervisor) {
@@ -210,7 +215,6 @@ function CollaborationPage() {
           projectOptions = allProjects.filter((project) => project.status === 'open' || project.status === 'in_progress')
         } else {
           // Normal users see only their owned projects and accepted joined projects
-          const ownedProjects = allProjects.filter((project) => Number(project.owner_id) === Number(currentUserId))
           const acceptedJoinedProjects = submittedApplications
             .filter((application) => application.status === 'Accepted' && application.project)
             .map((application) => ({
@@ -240,8 +244,23 @@ function CollaborationPage() {
         }
 
         if (projectOptions.length > 0) {
-          const hasQueryProject = queryProject && projectOptions.some((project) => String(project.id) === String(queryProject))
-          setSelectedProjectId(String(hasQueryProject ? queryProject : projectOptions[0].id))
+          let defaultProjectId = projectOptions[0].id
+          
+          // Prioritize owned projects as default (for all users, including supervisors)
+          if (ownedProjects.length > 0) {
+            defaultProjectId = ownedProjects[0].id
+          }
+          
+          // Use query parameter if valid and in accessible projects, otherwise use default
+          let selectedId = defaultProjectId
+          if (queryProject) {
+            const hasQueryProject = projectOptions.some((project) => String(project.id) === String(queryProject))
+            if (hasQueryProject) {
+              selectedId = queryProject
+            }
+          }
+          
+          setSelectedProjectId(String(selectedId))
         }
       } catch (error) {
         const message = error?.response?.data?.message || 'Unable to load collaboration projects.'
@@ -480,19 +499,71 @@ function CollaborationPage() {
 
     clearMessages()
     try {
-      await createMeeting(selectedProjectId, {
-        title: meetingTitle,
-        scheduled_for: new Date(meetingDateTime).toISOString(),
-        location: meetingLocation,
-      })
+      if (editingMeetingId) {
+        // Update mode
+        await axiosClient.patch(`/api/collaboration/meetings/${editingMeetingId}`, {
+          title: meetingTitle,
+          description: meetingDescription,
+          scheduled_for: new Date(meetingDateTime).toISOString(),
+          location: meetingLocation,
+        })
+        showSuccess('Meeting updated.')
+        setEditingMeetingId(null)
+      } else {
+        // Create mode
+        await createMeeting(selectedProjectId, {
+          title: meetingTitle,
+          description: meetingDescription,
+          scheduled_for: new Date(meetingDateTime).toISOString(),
+          location: meetingLocation,
+        })
+        showSuccess('Meeting scheduled.')
+      }
       setMeetings(await listMeetings(selectedProjectId))
       setMeetingTitle('')
       setMeetingDateTime('')
       setMeetingLocation('')
-      showSuccess('Meeting scheduled.')
+      setMeetingDescription('')
     } catch (error) {
       setErrorMessage(error?.response?.data?.message || 'Unable to create meeting.')
     }
+  }
+
+  const handleEditMeeting = (meeting) => {
+    setEditingMeetingId(meeting.id)
+    setMeetingTitle(meeting.title)
+    setMeetingDescription(meeting.description || '')
+    setMeetingLocation(meeting.location || '')
+    const date = new Date(meeting.scheduled_for)
+    setMeetingDateTime(date.toISOString().slice(0, 16))
+  }
+
+  const handleDeleteMeeting = async (meetingId) => {
+    if (!window.confirm('Are you sure you want to delete this meeting?')) {
+      return
+    }
+    clearMessages()
+    try {
+      await axiosClient.delete(`/api/collaboration/meetings/${meetingId}`)
+      setMeetings(await listMeetings(selectedProjectId))
+      showSuccess('Meeting deleted.')
+    } catch (error) {
+      setErrorMessage(error?.response?.data?.message || 'Unable to delete meeting.')
+    }
+  }
+
+  const clearMeetingForm = () => {
+    setMeetingTitle('')
+    setMeetingDateTime('')
+    setMeetingLocation('')
+    setMeetingDescription('')
+    setEditingMeetingId(null)
+  }
+
+  const getMeetingStatus = (scheduledFor) => {
+    const now = new Date()
+    const meetingDate = new Date(scheduledFor)
+    return meetingDate > now ? 'Upcoming' : 'Completed'
   }
 
   const handleGenerateReport = async () => {
@@ -752,10 +823,7 @@ function CollaborationPage() {
           </div>
 
           {tasks.length === 0 ? (
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No tasks have been created for this project yet.</div>
-              <ExampleCard title="Suggested task board" items={examples.tasks} />
-            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No tasks have been created for this project yet.</div>
           ) : (
             <div className="grid gap-3">
               {tasks.map((task) => (
@@ -806,10 +874,7 @@ function CollaborationPage() {
             <button type="button" onClick={handlePostAnnouncement} className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white">Post</button>
           </div>
           {announcements.length === 0 ? (
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No announcements have been posted yet.</div>
-              <ExampleCard title="Suggested announcements" items={examples.announcements} />
-            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No announcements have been posted yet.</div>
           ) : (
             <div className="grid gap-3">
               {announcements.map((item) => (
@@ -873,24 +938,47 @@ function CollaborationPage() {
           </div>
         ) : (
         <div className="space-y-4">
-          <div className="grid gap-2 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-4">
-            <input value={meetingTitle} onChange={(event) => setMeetingTitle(event.target.value)} placeholder="Meeting title" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <input value={meetingDateTime} onChange={(event) => setMeetingDateTime(event.target.value)} type="datetime-local" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <input value={meetingLocation} onChange={(event) => setMeetingLocation(event.target.value)} placeholder="Location" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <button type="button" onClick={handleCreateMeeting} className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white">Schedule</button>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="mb-3 text-sm font-semibold text-slate-900">{editingMeetingId ? 'Edit Meeting' : 'Schedule New Meeting'}</p>
+            <div className="space-y-3">
+              <input value={meetingTitle} onChange={(event) => setMeetingTitle(event.target.value)} placeholder="Meeting title *" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+              <input value={meetingDateTime} onChange={(event) => setMeetingDateTime(event.target.value)} type="datetime-local" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+              <input value={meetingLocation} onChange={(event) => setMeetingLocation(event.target.value)} placeholder="Location or meeting link" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+              <textarea value={meetingDescription} onChange={(event) => setMeetingDescription(event.target.value)} placeholder="Meeting agenda/description" className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" rows="3" />
+              <div className="flex gap-2">
+                <button type="button" onClick={handleCreateMeeting} className="flex-1 rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700">{editingMeetingId ? 'Update Meeting' : 'Schedule Meeting'}</button>
+                {editingMeetingId && (
+                  <button type="button" onClick={clearMeetingForm} className="flex-1 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                )}
+              </div>
+            </div>
           </div>
           {meetings.length === 0 ? (
-            <div className="space-y-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No meetings have been scheduled yet.</div>
-              <ExampleCard title="Suggested meeting schedule" items={examples.meetings} />
-            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">No meetings have been scheduled yet.</div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3">
               {meetings.map((item) => (
                 <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                  <p className="text-xs text-slate-600">{formatDateTime(item.scheduled_for)}</p>
-                  <p className="text-xs text-slate-500">{item.location || 'No location'}</p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getMeetingStatus(item.scheduled_for) === 'Upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                          {getMeetingStatus(item.scheduled_for)}
+                        </span>
+                      </div>
+                      {item.description && <p className="mt-2 text-xs text-slate-700">{item.description}</p>}
+                      <div className="mt-2 space-y-1 text-xs text-slate-600">
+                        <p>📅 {formatDateTime(item.scheduled_for)}</p>
+                        {item.location && <p>📍 {item.location}</p>}
+                        {item.created_by && <p>Created by: {item.created_by.full_name}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => handleEditMeeting(item)} className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit</button>
+                      <button type="button" onClick={() => handleDeleteMeeting(item.id)} className="rounded-lg border border-red-300 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">Delete</button>
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>

@@ -16,8 +16,32 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-function AnalyticsSection({ projects = [], applications = [], applicationsOverTime = [], isLoading = false }) {
+function AnalyticsSection({ projects = [], applications = [], applicationsOverTime = [], projectProgress = [], isLoading = false }) {
   const navigate = useNavigate()
+
+  // Get progress bar color based on percentage
+  const getProgressColor = (percent) => {
+    if (percent >= 75) return 'bg-green-500'
+    if (percent >= 50) return 'bg-blue-500'
+    if (percent >= 25) return 'bg-amber-500'
+    return 'bg-red-500'
+  }
+
+  // Get status badge color
+  const getStatusBadgeColor = (status) => {
+    switch (status.toLowerCase()) {
+      case 'open':
+        return 'bg-green-100 text-green-800'
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800'
+      case 'completed':
+        return 'bg-emerald-100 text-emerald-800'
+      case 'closed':
+        return 'bg-slate-100 text-slate-800'
+      default:
+        return 'bg-slate-100 text-slate-800'
+    }
+  }
 
   // Check if there's meaningful data
   const hasData = useMemo(() => {
@@ -71,12 +95,10 @@ function AnalyticsSection({ projects = [], applications = [], applicationsOverTi
   const chartData = useMemo(() => {
     if (Array.isArray(applicationsOverTime) && applicationsOverTime.length > 0) {
       // Transform backend data to chart format
-      // Backend returns periods as ISO dates, convert to weekday names for X-axis
+      // Backend returns weeks as "Week 1", "Week 2", etc.
       return applicationsOverTime.map((item) => {
-        const dateObj = new Date(item.period)
-        const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' })
         return {
-          day: dayOfWeek,
+          week: item.period,  // Use period directly (Week 1, Week 2, etc.)
           applications: item.count || 0,
         }
       })
@@ -201,7 +223,7 @@ function AnalyticsSection({ projects = [], applications = [], applicationsOverTi
               margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="day" />
+              <XAxis dataKey="week" />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -216,6 +238,78 @@ function AnalyticsSection({ projects = [], applications = [], applicationsOverTi
               />
             </LineChart>
           </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Project Progress - Final Section */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-slate-900">Project Progress</h3>
+        {Array.isArray(projectProgress) && projectProgress.length > 0 ? (
+          <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+            {projectProgress.map((project, index) => (
+              <div 
+                key={project.id} 
+                className={`p-6 ${index !== projectProgress.length - 1 ? 'border-b border-slate-100' : ''}`}
+              >
+                {/* Project header */}
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-slate-900 truncate">{project.title}</h4>
+                  </div>
+                  <span className={`inline-block rounded-md px-3 py-1 text-xs font-medium whitespace-nowrap ${getStatusBadgeColor(project.status)}`}>
+                    {project.status.replace('_', ' ')}
+                  </span>
+                </div>
+
+                {/* Task stats line */}
+                <div className="mb-3 text-sm text-slate-600">
+                  {project.total_tasks === 0 ? (
+                    <span className="font-medium">No tasks yet</span>
+                  ) : (
+                    <span className="font-medium">
+                      {project.completed_tasks}/{project.total_tasks} tasks completed
+                    </span>
+                  )}
+                </div>
+
+                {/* Progress bar and percentage */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    {project.total_tasks > 0 && (
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          project.is_officially_complete ? 'bg-emerald-500' : getProgressColor(project.progress_percent)
+                        }`}
+                        style={{ width: `${project.is_officially_complete ? 100 : project.progress_percent}%` }}
+                      />
+                    )}
+                  </div>
+                  <div className="w-48 text-right text-sm font-semibold text-slate-900">
+                    {project.total_tasks === 0 ? (
+                      '—'
+                    ) : project.is_officially_complete ? (
+                      <span className="text-emerald-600">100% — Completed ✓</span>
+                    ) : (
+                      <>
+                        <div>{project.progress_percent}% complete</div>
+                        {project.title === 'E-commerce Platform Redesign' && (
+                          <div className="text-xs text-slate-500 font-normal">
+                            {project.status === 'open' ? 'Awaiting submission' : project.status}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-6 py-12 text-center">
+            <div className="mb-3 text-3xl">📋</div>
+            <h4 className="mb-1 font-semibold text-slate-900">No projects to track</h4>
+            <p className="text-sm text-slate-600">Create a project or join a team to see progress tracking.</p>
+          </div>
         )}
       </div>
     </section>

@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from extensions import db
+from models.application import Application
 from models.collaboration import (
     Notification,
     ProjectAnnouncement,
@@ -106,6 +107,7 @@ def _serialize_meeting(meeting):
         "id": meeting.id,
         "project_id": meeting.project_id,
         "title": meeting.title,
+        "description": meeting.description,
         "scheduled_for": meeting.scheduled_for.isoformat() if meeting.scheduled_for else None,
         "location": meeting.location,
         "created_at": meeting.created_at.isoformat() if meeting.created_at else None,
@@ -147,6 +149,20 @@ def _is_project_owner(project, user_id):
     return project.owner_id == user_id
 
 
+def _is_supervisor(user_id):
+    user = db.session.get(User, user_id)
+    return user is not None and user.is_supervisor
+
+
+def _has_accepted_application(project_id, user_id):
+    application = Application.query.filter_by(
+        project_id=project_id,
+        user_id=user_id,
+        status="Accepted"
+    ).first()
+    return application is not None
+
+
 def _is_team_member(project_id, user_id):
     return (
         TeamMember.query.filter_by(project_id=project_id, user_id=user_id).first()
@@ -168,8 +184,16 @@ def _can_manage_project(project, user_id):
 
 
 def _ensure_project_access(project, user_id):
-    if _is_project_owner(project, user_id) or _is_team_member(project.id, user_id):
+    # Supervisors have access to all projects
+    if _is_supervisor(user_id):
         return None
+    
+    # Normal users need to own the project, be a team member, or have an accepted application
+    if (_is_project_owner(project, user_id) or 
+        _is_team_member(project.id, user_id) or
+        _has_accepted_application(project.id, user_id)):
+        return None
+    
     return jsonify({"message": "You are not allowed to access this project collaboration space"}), 403
 
 
@@ -641,12 +665,14 @@ def schedule_meeting(project_id):
         title = validate_required_text(payload.get("title"), "title", min_length=3, max_length=180)
         scheduled_for = _parse_iso_datetime(payload.get("scheduled_for"), "scheduled_for")
         location = (payload.get("location") or "").strip() or None
+        description = (payload.get("description") or "").strip() or None
     except ValueError as exc:
         return jsonify({"message": str(exc)}), 400
 
     meeting = ProjectMeeting(
         project_id=project_id,
         title=title,
+        description=description,
         scheduled_for=scheduled_for,
         location=location,
         created_by_id=current_user_id,
@@ -665,6 +691,62 @@ def schedule_meeting(project_id):
 
     db.session.commit()
     return jsonify({"message": "Meeting scheduled", "meeting": _serialize_meeting(meeting)}), 201
+
+
+@collaboration_bp.patch("/meetings/<int:meeting_id>")
+@jwt_required()
+def update_meeting(meeting_id):
+    meeting = db.session.get(ProjectMeeting, meeting_id)
+    if meeting is None:
+        return jsonify({"message": "Meeting not found"}), 404
+
+    current_user_id = _current_user_id()
+    project = meeting.project
+    if not _can_manage_project(project, current_user_id):
+        return jsonify({"message": "Only the project owner or team leader can update meetings"}), 403
+
+    try:
+        payload = parse_json_payload(request)
+    except ValueError as exc:
+        return jsonify({"message": str(exc)}), 400
+
+    if "title" in payload:
+        try:
+            meeting.title = validate_required_text(payload.get("title"), "title", min_length=3, max_length=180)
+        except ValueError as exc:
+            return jsonify({"message": str(exc)}), 400
+
+    if "description" in payload:
+        meeting.description = (payload.get("description") or "").strip() or None
+
+    if "scheduled_for" in payload:
+        try:
+            meeting.scheduled_for = _parse_iso_datetime(payload.get("scheduled_for"), "scheduled_for")
+        except ValueError as exc:
+            return jsonify({"message": str(exc)}), 400
+
+    if "location" in payload:
+        meeting.location = (payload.get("location") or "").strip() or None
+
+    db.session.commit()
+    return jsonify({"message": "Meeting updated", "meeting": _serialize_meeting(meeting)}), 200
+
+
+@collaboration_bp.delete("/meetings/<int:meeting_id>")
+@jwt_required()
+def delete_meeting(meeting_id):
+    meeting = db.session.get(ProjectMeeting, meeting_id)
+    if meeting is None:
+        return jsonify({"message": "Meeting not found"}), 404
+
+    current_user_id = _current_user_id()
+    project = meeting.project
+    if not _can_manage_project(project, current_user_id):
+        return jsonify({"message": "Only the project owner or team leader can delete meetings"}), 403
+
+    db.session.delete(meeting)
+    db.session.commit()
+    return jsonify({"message": "Meeting deleted"}), 200
 
 
 @collaboration_bp.get("/notifications")

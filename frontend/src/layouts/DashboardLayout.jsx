@@ -12,7 +12,7 @@ function DashboardLayout() {
       <DashboardSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-white">
+      <main className="flex-1 overflow-y-auto bg-white pt-16">
         <div className="flex flex-col h-full">
           {/* Mobile menu button */}
           <div className="sm:hidden border-b border-slate-200 px-4 py-3">

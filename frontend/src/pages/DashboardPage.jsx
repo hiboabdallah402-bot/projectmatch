@@ -12,6 +12,7 @@ function DashboardPage() {
   const [projects, setProjects] = useState([])
   const [applications, setApplications] = useState([])
   const [applicationsOverTime, setApplicationsOverTime] = useState([])
+  const [projectProgress, setProjectProgress] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -24,13 +25,17 @@ function DashboardPage() {
       }
 
       try {
-        const [userResponse, dashboardResponse] = await Promise.all([
+        const [userResponse, dashboardResponse, progressResponse] = await Promise.all([
           axiosClient.get('/api/auth/me'),
           axiosClient.get('/api/dashboard/stats'),
+          axiosClient.get('/api/dashboard/project-progress'),
         ])
 
         const currentUser = userResponse.data?.user || null
         const dashboardStats = dashboardResponse.data || {}
+        const progressData = progressResponse.data || {}
+
+        console.log('[DashboardPage] Progress data received:', progressData)
 
         const nextStats = [
           {
@@ -56,7 +61,16 @@ function DashboardPage() {
         setProjects(dashboardStats.projects || [])
         setApplications(dashboardStats.applications || [])
         setApplicationsOverTime(dashboardStats.applications_over_time || [])
+        setProjectProgress(progressData.projects || [])
+        
+        console.log('[DashboardPage] Project progress state set:', progressData.projects?.length || 0, 'projects')
       } catch (error) {
+        console.error('[DashboardPage] Error loading dashboard data:', error)
+        console.error('[DashboardPage] Error details:', {
+          status: error?.response?.status,
+          message: error?.response?.data?.message,
+          url: error?.config?.url
+        })
         const message = error?.response?.data?.message || 'Unable to load your profile details right now.'
         setErrorMessage(message)
         setStats([
@@ -100,11 +114,12 @@ function DashboardPage() {
         <DashboardStatsSection stats={stats} />
       </section>
 
-      {/* Analytics */}
+      {/* Analytics (includes Project Progress at the end) */}
       <AnalyticsSection 
         projects={projects} 
         applications={applications}
         applicationsOverTime={applicationsOverTime}
+        projectProgress={projectProgress}
         isLoading={isLoading} 
       />
     </div>

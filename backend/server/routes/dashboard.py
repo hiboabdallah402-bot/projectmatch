@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from extensions import db
 from models.activity import Activity
 from models.application import Application
+from models.collaboration import ProjectTask, TeamMember
 from models.project import Project
 from models.user import User
 
@@ -67,32 +68,47 @@ def _serialize_activity(activity):
 
 def _get_applications_over_time(applications):
 	"""
-	Aggregate applications by date over the last 7 days.
-	Returns a list of dicts with period (date) and count.
+	Aggregate applications by week over the last 30 days (4 weeks).
+	Returns a list of dicts with week label and count.
 	"""
 	if not applications:
 		return []
 	
-	# Get the last 7 days of data
+	# Get the last 30 days of data (4 weeks)
 	today = datetime.utcnow().date()
-	date_range = [(today - timedelta(days=i)).isoformat() for i in range(6, -1, -1)]
+	start_date = today - timedelta(days=29)  # 30 days total
 	
-	# Create a dict to count applications per date
-	app_counts = {}
-	for date_str in date_range:
-		app_counts[date_str] = 0
+	# Create a dict to count applications per week
+	# Week 1: Days 0-6, Week 2: Days 7-13, Week 3: Days 14-20, Week 4: Days 21-29
+	week_counts = {
+		"Week 1": 0,
+		"Week 2": 0,
+		"Week 3": 0,
+		"Week 4": 0,
+	}
 	
-	# Count applications by applied_at date
+	# Count applications by week
 	for app in applications:
 		if app.applied_at:
-			app_date = app.applied_at.date().isoformat()
-			if app_date in app_counts:
-				app_counts[app_date] += 1
+			app_date = app.applied_at.date()
+			# Check if application is within the last 30 days
+			if start_date <= app_date <= today:
+				days_ago = (today - app_date).days
+				if days_ago < 7:
+					week_counts["Week 1"] += 1
+				elif days_ago < 14:
+					week_counts["Week 2"] += 1
+				elif days_ago < 21:
+					week_counts["Week 3"] += 1
+				else:
+					week_counts["Week 4"] += 1
 	
-	# Convert to list format for chart
+	# Convert to list format for chart (in chronological order: Week 4 is oldest)
 	result = [
-		{"period": date_str, "count": app_counts[date_str]}
-		for date_str in date_range
+		{"period": "Week 4", "count": week_counts["Week 4"]},
+		{"period": "Week 3", "count": week_counts["Week 3"]},
+		{"period": "Week 2", "count": week_counts["Week 2"]},
+		{"period": "Week 1", "count": week_counts["Week 1"]},
 	]
 	
 	return result
@@ -217,3 +233,95 @@ def dashboard_stats():
 			"applications": [_serialize_application(a) for a in all_applications],
 		}
 	), 200
+
+
+def _is_supervisor(user_id):
+	"""Check if user is a supervisor."""
+	user = db.session.get(User, user_id)
+	return user is not None and user.is_supervisor
+
+
+def _get_accessible_projects(user_id):
+	"""
+	Get projects accessible to the user based on authorization rules.
+	
+	Supervisors: All projects
+	Normal users: Projects they own or have an accepted application to (are team members of)
+	"""
+	is_supervisor = _is_supervisor(user_id)
+	
+	if is_supervisor:
+		# Supervisors can see all projects
+		projects = Project.query.all()
+	else:
+		# Normal users: owned projects + projects where they are team members
+		owned_projects = Project.query.filter_by(owner_id=user_id).all()
+		
+		# Get projects where user is a team member (has accepted application)
+		team_projects = (
+			Project.query.join(TeamMember)
+			.filter(TeamMember.user_id == user_id)
+			.all()
+		)
+		
+		# Combine and deduplicate
+		projects = list({p.id: p for p in owned_projects + team_projects}.values())
+	
+	return projects
+
+
+@dashboard_bp.get("/project-progress")
+@jwt_required()
+def get_project_progress():
+	"""Get project progress data for accessible projects."""
+	current_user_id = int(get_jwt_identity())
+	
+	# Get accessible projects
+	projects = _get_accessible_projects(current_user_id)
+	
+	# Calculate progress for each project
+	project_progress_list = []
+	for project in projects:
+		# Count tasks by status (only "completed" status tasks count)
+		total_tasks = ProjectTask.query.filter_by(project_id=project.id).count()
+		completed_tasks = ProjectTask.query.filter_by(
+			project_id=project.id,
+			status="completed"
+		).count()
+		
+		# Calculate task progress percentage (0-100% based on completed tasks)
+		if total_tasks > 0:
+			task_progress_percent = int((completed_tasks / total_tasks) * 100)
+		else:
+			task_progress_percent = 0
+		
+		# Determine if project is officially completed
+		# Project is complete only when status is "completed" or "closed"
+		is_project_officially_complete = project.status in ["completed", "closed"]
+		
+		# Final progress to display:
+		# - If project is officially complete: 100% with "Project Completed" label
+		# - If project is open/in_progress: show task-based progress (0-100%)
+		#   even if all tasks are done, project must be officially marked as complete
+		if is_project_officially_complete:
+			progress_percent = 100
+		else:
+			progress_percent = task_progress_percent
+		
+		project_progress_list.append({
+			"id": project.id,
+			"title": project.title,
+			"status": project.status,
+			"total_tasks": total_tasks,
+			"completed_tasks": completed_tasks,
+			"progress_percent": progress_percent,
+			"is_officially_complete": is_project_officially_complete,
+			"task_progress_percent": task_progress_percent,
+		})
+	
+	# Sort by progress descending (highest progress first)
+	project_progress_list.sort(key=lambda p: p["progress_percent"], reverse=True)
+	
+	return jsonify({
+		"projects": project_progress_list
+	}), 200

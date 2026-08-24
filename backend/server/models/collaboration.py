@@ -162,6 +162,7 @@ class ProjectMeeting(db.Model):
 		index=True,
 	)
 	title = db.Column(db.String(180), nullable=False)
+	description = db.Column(db.Text, nullable=True)
 	scheduled_for = db.Column(db.DateTime, nullable=False)
 	location = db.Column(db.String(180), nullable=True)
 	created_by_id = db.Column(
