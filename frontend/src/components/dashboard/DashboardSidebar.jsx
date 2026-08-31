@@ -9,6 +9,7 @@ import {
   Bell,
   User,
   BarChart3,
+  Lightbulb,
   LogOut,
 } from 'lucide-react'
 import ProjectMatchLogoMark from '../common/ProjectMatchLogoMark'
@@ -143,7 +144,10 @@ function DashboardSidebar({ isOpen, onClose }) {
           {/* Footer Tip */}
           <div className="mt-auto border-t border-slate-200 pt-4">
             <div className="rounded-lg bg-indigo-50 border border-indigo-200 p-3">
-              <p className="text-xs font-semibold text-indigo-900">💡 Tip</p>
+              <p className="text-xs font-semibold text-indigo-900 inline-flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-indigo-900" />
+                <span>Tip</span>
+              </p>
               <p className="mt-1 text-xs text-indigo-800">Use collaboration features to manage your team effectively.</p>
             </div>
           </div>
